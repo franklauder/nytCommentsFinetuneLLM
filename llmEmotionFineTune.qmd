@@ -3,6 +3,12 @@ title: "Fine Tuning LLM Emotion Predictions on New ork Times 2017 Comments"
 format: html
 ---
 
+
+# Introduction
+
+
+# Data Inspection
+
 ```{python}
 
 import torch
@@ -18,6 +24,51 @@ import seaborn as sn
 
 
 ```
+
+```{python}
+
+
+
+from transformers import pipeline
+
+
+```
+
+
+```{python}
+
+
+from transformers import AutoModel, AutoTokenizer
+from transformers import AutoModelForSequenceClassification
+from transformers import Trainer, TrainingArguments
+from transformers.pipelines.pt_utils import KeyDataset
+from tqdm.auto import tqdm
+
+
+
+
+
+```
+
+
+```{python}
+
+from transformers.pipelines.pt_utils import KeyDataset
+
+
+
+
+```
+
+```{python}
+
+from tqdm.auto import tqdm
+
+
+
+```
+
+
 
 
 ```{python}
@@ -105,5 +156,64 @@ print(nytComments17_emotion[["typeOfMaterial", "top_emotion"]].value_counts(norm
 
 
 ```
+
+
+```{python}
+
+
+
+nyt_emotionType_count=nytComments17_emotion[["typeOfMaterial", "top_emotion"]]
+
+
+
+```
+
+
+```{python}
+
+
+
+nyt_emotionType_count.head()
+
+
+```
+
+
+
+```{python}
+
+
+
+nyt_emotionType_count.groupby(['typeOfMaterial', 'top_emotion']).count()
+
+
+
+
+```
+
+
+# Model Fine Tuning
+
+```{python}
+
+
+pipe = pipeline("text-classification", model="avichr/hebEMO_anger")
+
+
+```
+
+
+
+
+```{python}
+
+
+tokenizer = AutoTokenizer.from_pretrained("avichr/hebEMO_anger")
+model = AutoModelForSequenceClassification.from_pretrained("avichr/hebEMO_anger")
+
+
+
+```
+
 
 
