@@ -181,7 +181,7 @@ print(nytComments17_sentiments[["newDesk", "sentiment"]].value_counts(normalize=
 
 
 
-nyt_emotionType_count=nytComments17_emotion[["typeOfMaterial", "top_emotion"]]
+nyt_sentimentType_count=nytComments17_sentiments[["typeOfMaterial", "sentiment"]]
 
 
 
@@ -192,7 +192,7 @@ nyt_emotionType_count=nytComments17_emotion[["typeOfMaterial", "top_emotion"]]
 
 
 
-nyt_emotionType_count.head()
+nyt_sentimentType_count.head()
 
 
 ```
@@ -203,8 +203,18 @@ nyt_emotionType_count.head()
 
 
 
-nyt_emotionType_count.groupby(['typeOfMaterial', 'top_emotion']).count()
+sentiment_material_cnt=nyt_sentimentType_count.groupby(['typeOfMaterial', 'sentiment']).sum()
 
+
+
+
+```
+
+```{python}
+
+
+
+print(sentiment_material_cnt)
 
 
 
@@ -216,7 +226,7 @@ nyt_emotionType_count.groupby(['typeOfMaterial', 'top_emotion']).count()
 ```{python}
 
 
-pipe = pipeline("text-classification", model="avichr/hebEMO_anger")
+pipe = pipeline("text-classification", model="cardiffnlp/twitter-roberta-base")
 
 
 ```
