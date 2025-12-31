@@ -226,23 +226,38 @@ print(sentiment_material_cnt)
 ```{python}
 
 
-pipe = pipeline("text-classification", model="cardiffnlp/twitter-roberta-base")
+#pipe = pipeline("text-classification", model="cardiffnlp/twitter-roberta-base")
 
 
 ```
 
 
+updated model
+
+```{python}
+
+
+pipe=pipeline("text-classification", model="cardiffnlp/twitter-roberta-base-sentiment-latest")
+
+
+```
 
 
 ```{python}
 
 
-tokenizer = AutoTokenizer.from_pretrained("avichr/hebEMO_anger")
-model = AutoModelForSequenceClassification.from_pretrained("avichr/hebEMO_anger")
+tokenizer = AutoTokenizer.from_pretrained("cardiffnlp/twitter-roberta-base-sentiment-latest")
+model = AutoModelForSequenceClassification.from_pretrained("cardiffnlp/twitter-roberta-base-sentiment-latest")
 
 
 
 ```
+
+
+
+
+
+
 
 
 
