@@ -85,7 +85,7 @@ torch.cuda.is_available()
 
 
 
-file_path = r'C:\Users\fvlau\OneDrive\Documents\NYTEmotionBackup\nyt_comments17_with_emotions_clean.csv'
+file_path = r'C:\Users\fvlau\OneDrive\Documents\nytCommentsFinetuneLLM\\nyt_comments17_with_sentiment.csv'
 
 
 ```
@@ -94,7 +94,7 @@ file_path = r'C:\Users\fvlau\OneDrive\Documents\NYTEmotionBackup\nyt_comments17_
 ```{python}
 
 
-nytComments17_emotion=pd.read_csv(file_path)
+nytComments17_sentiments=pd.read_csv(file_path)
 
 
 
@@ -106,7 +106,7 @@ nytComments17_emotion=pd.read_csv(file_path)
 
 
 
-nytComments17_emotion.info()
+nytComments17_sentiments.info()
 
 
 
@@ -116,7 +116,7 @@ nytComments17_emotion.info()
 ```{python}
 
 
-print(nytComments17_emotion.shape)
+print(nytComments17_sentiments.shape)
 
 
 
@@ -125,25 +125,25 @@ print(nytComments17_emotion.shape)
 
 ```{python}
 
-print(nytComments17_emotion["top_emotion"].value_counts())
+print(nytComments17_sentiments["sentiment"].value_counts())
 
 
 ```
 
 ```{python}
 
-print(nytComments17_emotion["top_emotion"].value_counts(normalize=True).round(2))
+print(nytComments17_sentiments["sentiment"].value_counts(normalize=True).round(2))
 
 
 ```
 
-From the value count ouput we see the top three emotions for out data set are trust, anticipation, and fear.  
+
 
 
 ```{python}
 
 
-print(nytComments17_emotion["typeOfMaterial"].value_counts(normalize=True).round(2))
+print(nytComments17_sentiments["typeOfMaterial"].value_counts(normalize=True).round(2))
 
 
 ```
@@ -152,7 +152,26 @@ print(nytComments17_emotion["typeOfMaterial"].value_counts(normalize=True).round
 
 
 
-print(nytComments17_emotion[["typeOfMaterial", "top_emotion"]].value_counts(normalize=True))
+print(nytComments17_sentiments["newDesk"].value_counts(normalize=True).round(2))
+
+
+
+```
+
+```{python}
+
+
+
+print(nytComments17_sentiments[["typeOfMaterial", "sentiment"]].value_counts(normalize=True))
+
+
+```
+
+```{python}
+
+
+print(nytComments17_sentiments[["newDesk", "sentiment"]].value_counts(normalize=True))
+
 
 
 ```
