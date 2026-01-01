@@ -20,7 +20,7 @@ import torch
 
 import pandas as pd
 import matplotlib as plt
-import seaborn as sn
+import seaborn as sns
 
 
 ```
@@ -158,6 +158,26 @@ print(nytComments17_sentiments["newDesk"].value_counts(normalize=True).round(2))
 
 ```
 
+
+```{python}
+
+
+
+crashes=sns.load_dataset("car_crashes")
+
+
+```
+
+```{python}
+
+
+
+crashes.head()
+
+
+
+```
+
 ```{python}
 
 
@@ -177,48 +197,8 @@ print(nytComments17_sentiments[["newDesk", "sentiment"]].value_counts(normalize=
 ```
 
 
-```{python}
 
 
-
-nyt_sentimentType_count=nytComments17_sentiments[["typeOfMaterial", "sentiment"]]
-
-
-
-```
-
-
-```{python}
-
-
-
-nyt_sentimentType_count.head()
-
-
-```
-
-
-
-```{python}
-
-
-
-sentiment_material_cnt=nyt_sentimentType_count.groupby(['typeOfMaterial', 'sentiment']).sum()
-
-
-
-
-```
-
-```{python}
-
-
-
-print(sentiment_material_cnt)
-
-
-
-```
 
 
 # Model Fine Tuning
@@ -232,7 +212,46 @@ print(sentiment_material_cnt)
 ```
 
 
-updated model
+## Pre-process
+
+
+The pre-trained model we are using has sentiment labels as: 0=negaticve, 1=neutral, 2=positive.  Since our dataset is labeled negative, neutral, and positive, we will convert them to integer values corresponding to the pre-trained model.
+
+```{python}
+
+
+
+rename_map={
+    "negative": 0,
+    "neutral": 1,
+    "positive": 2
+}
+
+
+
+
+```
+
+```{python}
+
+
+nytComments17_sentiments['sentiment'] = nytComments17_sentiments['sentiment'].replace(rename_map)
+
+
+
+```
+
+```{python}
+
+
+
+
+nytComments17_sentiments['sentiment'].value_counts()
+
+
+```
+
+Our dataset's sentiment labels now match the pre-trained model. 
 
 ```{python}
 
