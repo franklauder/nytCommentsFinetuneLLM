@@ -21,6 +21,7 @@ import torch
 import pandas as pd
 import matplotlib as plt
 import seaborn as sns
+import numpy as np
 
 
 ```
@@ -197,6 +198,16 @@ print(nytComments17_sentiments[["newDesk", "sentiment"]].value_counts(normalize=
 ```
 
 
+```{python}
+
+
+nytComments17_sentiments.groupby(['typeOfMaterial', 'sentiment'])['sentiment'].count()
+
+
+
+```
+
+
 
 
 
@@ -217,6 +228,17 @@ print(nytComments17_sentiments[["newDesk", "sentiment"]].value_counts(normalize=
 
 The pre-trained model we are using has sentiment labels as: 0=negaticve, 1=neutral, 2=positive.  Since our dataset is labeled negative, neutral, and positive, we will convert them to integer values corresponding to the pre-trained model.
 
+
+### Labels
+
+```{python}
+
+
+nytComments17_sentiments2 = nytComments17_sentiments.copy()
+
+
+```
+
 ```{python}
 
 
@@ -232,10 +254,18 @@ rename_map={
 
 ```
 
+
+```{python}
+
+pd.set_option('future.no_silent_downcasting', True)
+
+
+```
+
 ```{python}
 
 
-nytComments17_sentiments['sentiment'] = nytComments17_sentiments['sentiment'].replace(rename_map)
+nytComments17_sentiments2 ['sentiment'] = nytComments17_sentiments2 ['sentiment'].replace(rename_map)
 
 
 
@@ -246,12 +276,72 @@ nytComments17_sentiments['sentiment'] = nytComments17_sentiments['sentiment'].re
 
 
 
-nytComments17_sentiments['sentiment'].value_counts()
+nytComments17_sentiments2['sentiment'].value_counts()
 
 
 ```
 
 Our dataset's sentiment labels now match the pre-trained model. 
+
+
+### Train Test Validation split
+
+Our dataset will be split into training, validation, and testing sets.  Before we initiate the split we will shuffle our data. 
+
+
+
+```{python}
+
+
+nytComments17_shuffled=nytComments17_sentiments2.copy()
+
+
+```
+
+```{python}
+
+
+nytComments17_shuffled=np.random.shuffle(nytComments17_sentiments2)
+
+np.random.shuffle()
+
+
+
+```
+
+We will use 70% of the commenbts for the training set, 10% for the validation set, and the remaining %20 for the testing set. 
+
+```{python}
+
+
+train_text=nytComments17_sentiments2.iloc[:678759]['commentBody'].values
+
+train_labels=nytComments17_sentiments2.iloc[:678759]['sentiment'].values
+
+```
+
+```{python}
+
+
+val_text=nytComments17_sentiments2.iloc[678759:775724]['commentBody'].values
+val_labels=nytComments17_sentiments2.iloc[678759:775724]['sentiment'].values
+
+
+```
+
+```{python}
+
+test_text=nytComments17_sentiments2.iloc[775724:]['commentBody'].values
+test_labels=nytComments17_sentiments2.iloc[775724:]['sentiment'].values
+
+
+
+```
+
+
+
+
+
 
 ```{python}
 
