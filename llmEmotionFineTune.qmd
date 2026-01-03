@@ -9,12 +9,7 @@ format: html
 
 # Data Inspection
 
-```{python}
 
-import torch
-
-
-```
 
 ```{python}
 
@@ -44,26 +39,40 @@ from transformers import AutoModelForSequenceClassification
 from transformers import Trainer, TrainingArguments
 from transformers.pipelines.pt_utils import KeyDataset
 from tqdm.auto import tqdm
-
-
-
-
-
-```
-
-
-```{python}
-
 from transformers.pipelines.pt_utils import KeyDataset
 
 
 
 
+
+
 ```
+
+
+
+
 
 ```{python}
 
 from tqdm.auto import tqdm
+
+
+
+```
+
+```{python}
+
+import torch
+
+
+```
+
+```{python}
+
+import torch.nn.functional as F
+import torchtext
+
+
 
 
 
@@ -426,6 +435,30 @@ pipe=pipeline("text-classification", model="cardiffnlp/twitter-roberta-base-sent
 ```
 
 
+## Tokenization
+
+
+```{python}
+
+
+
+torch.backends.cudnn.deterministic=True
+RANDOM_SEED=123
+torch.manual_seed(RANDOM_SEED)
+
+
+```
+
+```{python}
+
+
+DEVICE=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+NUM_EPOCHS = 3
+
+
+
+```
+
 ```{python}
 
 
@@ -435,6 +468,19 @@ model = AutoModelForSequenceClassification.from_pretrained("cardiffnlp/twitter-r
 
 
 ```
+
+
+```{python}
+
+
+
+train_encodings=tokenizer(list(train_text), truncation=True, padding=True)
+valid_encodings=tokenizer(list(val_text), truncation=True, padding=True)
+test_encodings=tokenizer(list(test_text), truncation=True, padding=True)
+
+
+```
+
 
 
 
