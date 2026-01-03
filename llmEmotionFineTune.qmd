@@ -320,41 +320,85 @@ nytComments17_shuffled=nytComments17_sentiments2.copy()
 
 ```
 
+
 ```{python}
+nytComments17_sentiments2.head(20)
 
-
-nytComments17_shuffled=np.random.shuffle(nytComments17_sentiments2)
-
-np.random.shuffle()
 
 
 
 ```
+
+```{python}
+
+
+nytComments17_shuffled=nytComments17_sentiments2.sample(frac=1, random_state=42).reset_index(drop=True)
+
+
+
+
+
+```
+
+
+```{python}
+
+
+
+nytComments17_shuffled.head(20)
+
+```
+
+
 
 We will use 70% of the commenbts for the training set, 10% for the validation set, and the remaining %20 for the testing set. 
 
+
 ```{python}
 
+len(nytComments17_shuffled)
 
-train_text=nytComments17_sentiments2.iloc[:678759]['commentBody'].values
-
-train_labels=nytComments17_sentiments2.iloc[:678759]['sentiment'].values
 
 ```
 
 ```{python}
 
 
-val_text=nytComments17_sentiments2.iloc[678759:775724]['commentBody'].values
-val_labels=nytComments17_sentiments2.iloc[678759:775724]['sentiment'].values
+train_text=nytComments17_shuffled.iloc[:678759]['commentBody'].values
+
+train_labels=nytComments17_shuffled.iloc[:678759]['sentiment'].values
+
+```
+
+```{python}
+
+
+val_text=nytComments17_shuffled.iloc[678759:775724]['commentBody'].values
+val_labels=nytComments17_shuffled.iloc[678759:775724]['sentiment'].values
 
 
 ```
 
 ```{python}
 
-test_text=nytComments17_sentiments2.iloc[775724:]['commentBody'].values
-test_labels=nytComments17_sentiments2.iloc[775724:]['sentiment'].values
+test_text=nytComments17_shuffled.iloc[775724:]['commentBody'].values
+test_labels=nytComments17_shuffled.iloc[775724:]['sentiment'].values
+
+
+
+```
+
+
+```{python}
+
+print(f"Training Text set length:{len(train_text)}, Validation Text set length:{len(val_text)}, Testing Text set length:{len(test_text)}")
+
+
+```
+
+```{python}
+
+print(f"Training Labels set length:{len(train_labels)}, Validation Text set length:{len(val_labels)}, Testing Text set length:{len(test_labels)}")
 
 
 
