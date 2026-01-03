@@ -138,6 +138,14 @@ print(nytComments17_sentiments["sentiment"].value_counts(normalize=True).round(2
 
 ```
 
+```{python}
+
+nytComments17_sentiments["sentiment"].value_counts(normalize=True).round(2).plot(kind='bar')
+
+
+
+```
+
 
 
 
