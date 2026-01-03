@@ -208,6 +208,28 @@ nytComments17_sentiments.groupby(['typeOfMaterial', 'sentiment'])['sentiment'].c
 ```
 
 
+```{python}
+
+
+
+
+pd.crosstab(index=nytComments17_sentiments.newDesk, columns=nytComments17_sentiments.sentiment, normalize='index').round(2)
+
+
+
+```
+
+```{python}
+
+
+
+(pd.crosstab(index=nytComments17_sentiments.newDesk, columns=nytComments17_sentiments.sentiment, normalize='index').round(2).style.background_gradient(cmap='Blues', axis=None))
+
+
+
+```
+
+
 
 
 
