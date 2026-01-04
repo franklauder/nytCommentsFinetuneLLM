@@ -17,9 +17,12 @@ import pandas as pd
 import matplotlib as plt
 import seaborn as sns
 import numpy as np
+import pickle
 
 
 ```
+
+
 
 ```{python}
 
@@ -67,10 +70,14 @@ import torch
 
 ```
 
+
+
 ```{python}
 
+from torch.utils.data import Dataset, DataLoader
 import torch.nn.functional as F
 import torchtext
+from torchtext.data.utils import get_tokenizer
 
 
 
@@ -106,6 +113,26 @@ file_path = r'C:\Users\fvlau\OneDrive\Documents\nytCommentsFinetuneLLM\\nyt_comm
 
 nytComments17_sentiments=pd.read_csv(file_path)
 
+
+
+```
+
+```{python}
+
+
+
+file_out = open("nytComments17_sentiments", "wb")
+pickle.dump(nytComments17_sentiments, file_out)
+file_out.close()
+
+
+```
+
+```{python}
+
+
+pickle_in = open("nytComments17_sentiments", "rb")
+nytComments17_sentiments = pickle.load(pickle_in)
 
 
 ```
@@ -310,6 +337,25 @@ nytComments17_sentiments2 ['sentiment'] = nytComments17_sentiments2 ['sentiment'
 
 ```
 
+
+```{python}
+
+
+file_out=open("nytComments17_sentiments2", "wb")
+pickle.dump(nytComments17_sentiments2, file_out)
+file_out.close()
+
+
+```
+
+```{python}
+
+
+
+
+
+```
+
 ```{python}
 
 
@@ -360,6 +406,18 @@ nytComments17_shuffled=nytComments17_sentiments2.sample(frac=1, random_state=42)
 
 ```{python}
 
+file_out = open("nytComments17_shuffled", "wb")
+pickle.dump(nytComments17_shuffled, file_out)
+file_out.close()
+
+
+
+
+```
+
+
+```{python}
+
 
 
 nytComments17_shuffled.head(20)
@@ -387,6 +445,28 @@ train_labels=nytComments17_shuffled.iloc[:678759]['sentiment'].values
 
 ```
 
+
+```{python}
+
+
+file_out = open("train_text", "wb")
+pickle.dump(train_text, file_out)
+file_out.close()
+
+
+
+```
+
+```{python}
+
+
+file_out = open("train_labels", "wb")
+pickle.dump(train_labels, file_out)
+file_out.close()
+
+
+```
+
 ```{python}
 
 
@@ -396,10 +476,55 @@ val_labels=nytComments17_shuffled.iloc[678759:775724]['sentiment'].values
 
 ```
 
+
+```{python}
+
+
+
+file_out = open("val_text", "wb")
+pickle.dump(val_text, file_out)
+file_out.close()
+
+
+```
+
+```{python}
+
+
+file_out = open("val_labels", "wb")
+pickle.dump(val_labels, file_out)
+file_out.close()
+
+
+
+```
+
 ```{python}
 
 test_text=nytComments17_shuffled.iloc[775724:]['commentBody'].values
 test_labels=nytComments17_shuffled.iloc[775724:]['sentiment'].values
+
+
+
+```
+
+```{python}
+
+file_out = open("test_text", "wb")
+pickle.dump(test_text, file_out)
+file_out.close()
+
+
+
+```
+
+
+```{python}
+
+
+file_out = open("test_labels", "wb")
+pickle.dump(test_labels, file_out)
+file_out.close()
 
 
 
@@ -420,6 +545,9 @@ print(f"Training Labels set length:{len(train_labels)}, Validation Text set leng
 
 
 ```
+
+
+
 
 
 
@@ -477,6 +605,26 @@ model = AutoModelForSequenceClassification.from_pretrained("cardiffnlp/twitter-r
 train_encodings=tokenizer(list(train_text), truncation=True, padding=True)
 valid_encodings=tokenizer(list(val_text), truncation=True, padding=True)
 test_encodings=tokenizer(list(test_text), truncation=True, padding=True)
+
+
+```
+
+Create class for custom dataset. 
+
+```{python}
+
+class NYTDataset(torch.utils.data.Dataset):
+    def __init__(self, encodings, labels):
+        self.encodings = encodings
+        self.labels = labels
+
+    def __getitem__(self, idx):
+        item = {key: torch.tensor(val[idx])
+            for key, val in self.encodings.items()}
+        item['labels'] = torch.tensor(self.labels[idx])
+        return item
+    def __len__(self):
+        return len(self.labels)
 
 
 ```
