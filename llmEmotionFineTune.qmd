@@ -9,6 +9,8 @@ format: html
 
 # Data Inspection
 
+## Libraries
+
 
 
 ```{python}
@@ -116,6 +118,8 @@ nytComments17_sentiments=pd.read_csv(file_path)
 
 
 ```
+
+## Data Review
 
 ```{python}
 
@@ -350,8 +354,8 @@ file_out.close()
 
 ```{python}
 
-
-
+pickle_in = open("nytComments17_sentiments2", "rb")
+nytComments17_sentiments2 = pickle.load(pickle_in)
 
 
 ```
@@ -392,12 +396,45 @@ nytComments17_sentiments2.head(20)
 
 ```
 
+
+
+
 ```{python}
 
 
 nytComments17_shuffled=nytComments17_sentiments2.sample(frac=1, random_state=42).reset_index(drop=True)
 
 
+
+
+
+```
+
+```{python}
+
+
+nytComments17_shuffled_small=nytComments17_sentiments2.sample(frac=0.3, random_state=42).reset_index(drop=True)
+
+
+
+```
+
+
+```{python}
+
+file_out = open("nytComments17_shuffled_small", "wb")
+pickle.dump(nytComments17_shuffled_small, file_out)
+file_out.close()
+
+
+
+```
+
+
+
+```{python}
+
+nytComments17_shuffled_small.info()
 
 
 
@@ -438,6 +475,22 @@ len(nytComments17_shuffled)
 
 ```{python}
 
+len(nytComments17_shuffled_small)
+
+
+```
+
+
+```{python}
+
+
+df_sample=nytComments17_sentiments2.iloc[:678759]
+
+
+```
+
+```{python}
+
 
 train_text=nytComments17_shuffled.iloc[:678759]['commentBody'].values
 
@@ -456,6 +509,20 @@ file_out.close()
 
 
 ```
+
+
+```{python}
+
+
+pickle_in = open("train_text", "rb")
+train_text = pickle.load(pickle_in)
+
+
+```
+
+
+
+
 
 ```{python}
 
@@ -547,10 +614,127 @@ print(f"Training Labels set length:{len(train_labels)}, Validation Text set leng
 ```
 
 
+```{python}
+
+train_text_small=nytComments17_shuffled_small.iloc[:203627]['commentBody'].values
+
+train_labels_small=nytComments17_shuffled_small.iloc[:203627]['sentiment'].values
+
+
+
+```
+
+
+```{python}
+
+
+
+file_out = open("train_text_small", "wb")
+pickle.dump(train_text_small, file_out)
+file_out.close()
+
+```
+
+
+```{python}
+
+
+file_out = open("train_labels_small", "wb")
+pickle.dump(train_labels_small, file_out)
+file_out.close()
+
+
+```
 
 
 
 
+
+```{python}
+
+
+
+
+val_text_small=nytComments17_shuffled_small.iloc[203627:232717]['commentBody'].values
+val_labels_small=nytComments17_shuffled_small.iloc[203627:232717]['sentiment'].values
+
+
+```
+
+
+```{python}
+
+
+file_out = open("val_text_small", "wb")
+pickle.dump(val_text_small, file_out)
+file_out.close()
+
+
+
+```
+
+
+```{python}
+
+
+file_out = open("val_labels_small", "wb")
+pickle.dump(val_labels_small, file_out)
+file_out.close()
+
+
+```
+
+
+```{python}
+
+test_text_small=nytComments17_shuffled_small.iloc[232717:]['commentBody'].values
+test_labels_small=nytComments17_shuffled_small.iloc[232717:]['sentiment'].values
+
+
+
+```
+
+
+```{python}
+
+file_out = open("test_text_small", "wb")
+pickle.dump(test_text_small, file_out)
+file_out.close()
+
+
+
+```
+
+
+```{python}
+
+file_out = open("test_labels_small", "wb")
+pickle.dump(test_labels_small, file_out)
+file_out.close()
+
+
+
+```
+
+
+
+```{python}
+
+
+
+print(f"Training Text set length:{len(train_text_small)}, Validation Text set length:{len(val_text_small)}, Testing Text set length:{len(test_text_small)}")
+
+
+```
+
+
+```{python}
+
+print(f"Training Labels set length:{len(train_labels_small)}, Validation Text set length:{len(val_labels_small)}, Testing Text set length:{len(test_labels_small)}")
+
+
+
+```
 
 
 
