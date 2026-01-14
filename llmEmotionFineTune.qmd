@@ -20,6 +20,8 @@ import matplotlib as plt
 import seaborn as sns
 import numpy as np
 import pickle
+import sklearn
+from sklearn.model_selection import train_test_split
 
 
 ```
@@ -30,7 +32,7 @@ import pickle
 
 
 
-from transformers import pipeline
+from transformers import pipeline, AutoModel, AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments
 
 
 ```
@@ -39,31 +41,19 @@ from transformers import pipeline
 ```{python}
 
 
-from transformers import AutoModel, AutoTokenizer
-from transformers import AutoModelForSequenceClassification
-from transformers import Trainer, TrainingArguments
 from transformers.pipelines.pt_utils import KeyDataset
 from tqdm.auto import tqdm
-from transformers.pipelines.pt_utils import KeyDataset
 
 
 
 
-
-
-```
-
-
-
-
-
-```{python}
-
-from tqdm.auto import tqdm
 
 
 
 ```
+
+
+
 
 ```{python}
 
@@ -80,6 +70,7 @@ from torch.utils.data import Dataset, DataLoader
 import torch.nn.functional as F
 import torchtext
 from torchtext.data.utils import get_tokenizer
+from datasets import Dataset, DatasetDict
 
 
 
@@ -304,10 +295,14 @@ The pre-trained model we are using has sentiment labels as: 0=negaticve, 1=neutr
 ```{python}
 
 
-nytComments17_sentiments2 = nytComments17_sentiments.copy()
+nyt_sentiments = nytComments17_sentiments.copy()
 
 
 ```
+
+
+
+
 
 ```{python}
 
@@ -335,18 +330,65 @@ pd.set_option('future.no_silent_downcasting', True)
 ```{python}
 
 
-nytComments17_sentiments2 ['sentiment'] = nytComments17_sentiments2 ['sentiment'].replace(rename_map)
+nyt_sentiments['sentiment'] = nytComments17_sentiments ['sentiment'].replace(rename_map)
+
+
+
+```
+
+We will also rename the columns sentiment and commentBody to reflect those used in the pre-trained model
+
+```{python}
+
+
+nyt_comments_dict = {"commentBody":"text", "sentiment":"label"}
+
+
+```
+
+```{python}
+
+nyt_sentiments = nyt_sentiments.rename(columns={"commentBody":"text", "sentiment":"label"})
+
+
+
+```
+
+```{python}
+
+nyt_sentiments.info()
 
 
 
 ```
 
 
+Columns not required for fine tuning and prediction will be dropped
+
+
+
 ```{python}
 
 
-file_out=open("nytComments17_sentiments2", "wb")
-pickle.dump(nytComments17_sentiments2, file_out)
+nyt_sentiments=nyt_sentiments.drop(columns=['commentID', 'typeOfMaterial', 'newDesk'], axis=1)
+
+```
+
+```{python}
+
+
+nyt_sentiments.info()
+
+
+```
+
+
+
+```{python}
+
+
+file_out=open("nyt_sentiments", "wb")
+pickle.dump(nyt_sentiments, file_out)
 file_out.close()
 
 
@@ -354,8 +396,8 @@ file_out.close()
 
 ```{python}
 
-pickle_in = open("nytComments17_sentiments2", "rb")
-nytComments17_sentiments2 = pickle.load(pickle_in)
+pickle_in = open("nyt_sentiments", "rb")
+nyt_sentiments = pickle.load(pickle_in)
 
 
 ```
@@ -365,7 +407,7 @@ nytComments17_sentiments2 = pickle.load(pickle_in)
 
 
 
-nytComments17_sentiments2['sentiment'].value_counts()
+nyt_sentiments['label'].value_counts()
 
 
 ```
@@ -402,7 +444,7 @@ nytComments17_sentiments2.head(20)
 ```{python}
 
 
-nytComments17_shuffled=nytComments17_sentiments2.sample(frac=1, random_state=42).reset_index(drop=True)
+nyt_shuffled=nytComments17_sentiments2.sample(frac=1, random_state=42).reset_index(drop=True)
 
 
 
@@ -413,7 +455,7 @@ nytComments17_shuffled=nytComments17_sentiments2.sample(frac=1, random_state=42)
 ```{python}
 
 
-nytComments17_shuffled_small=nytComments17_sentiments2.sample(frac=0.3, random_state=42).reset_index(drop=True)
+nyt_shuffled_small=nyt_sentiments.sample(frac=0.04, random_state=42).reset_index(drop=True)
 
 
 
@@ -422,8 +464,8 @@ nytComments17_shuffled_small=nytComments17_sentiments2.sample(frac=0.3, random_s
 
 ```{python}
 
-file_out = open("nytComments17_shuffled_small", "wb")
-pickle.dump(nytComments17_shuffled_small, file_out)
+file_out = open("nyt_shuffled_small", "wb")
+pickle.dump(nyt_shuffled_small, file_out)
 file_out.close()
 
 
@@ -434,19 +476,7 @@ file_out.close()
 
 ```{python}
 
-nytComments17_shuffled_small.info()
-
-
-
-```
-
-
-```{python}
-
-file_out = open("nytComments17_shuffled", "wb")
-pickle.dump(nytComments17_shuffled, file_out)
-file_out.close()
-
+nyt_shuffled_small.info()
 
 
 
@@ -456,8 +486,20 @@ file_out.close()
 ```{python}
 
 
+nyt_shuffled_small['label'].value_counts(normalize=True)
 
-nytComments17_shuffled.head(20)
+
+```
+
+
+
+
+
+```{python}
+
+
+
+nyt_shuffled_small.head(20)
 
 ```
 
@@ -466,252 +508,13 @@ nytComments17_shuffled.head(20)
 We will use 70% of the commenbts for the training set, 10% for the validation set, and the remaining %20 for the testing set. 
 
 
-```{python}
-
-len(nytComments17_shuffled)
-
-
-```
-
-```{python}
-
-len(nytComments17_shuffled_small)
-
-
-```
-
-
-```{python}
-
-
-df_sample=nytComments17_sentiments2.iloc[:678759]
-
-
-```
-
-```{python}
-
-
-train_text=nytComments17_shuffled.iloc[:678759]['commentBody'].values
-
-train_labels=nytComments17_shuffled.iloc[:678759]['sentiment'].values
-
-```
-
-
-```{python}
-
-
-file_out = open("train_text", "wb")
-pickle.dump(train_text, file_out)
-file_out.close()
-
-
-
-```
-
-
-```{python}
-
-
-pickle_in = open("train_text", "rb")
-train_text = pickle.load(pickle_in)
-
-
-```
-
 
 
 
 
 ```{python}
 
-
-file_out = open("train_labels", "wb")
-pickle.dump(train_labels, file_out)
-file_out.close()
-
-
-```
-
-```{python}
-
-
-val_text=nytComments17_shuffled.iloc[678759:775724]['commentBody'].values
-val_labels=nytComments17_shuffled.iloc[678759:775724]['sentiment'].values
-
-
-```
-
-
-```{python}
-
-
-
-file_out = open("val_text", "wb")
-pickle.dump(val_text, file_out)
-file_out.close()
-
-
-```
-
-```{python}
-
-
-file_out = open("val_labels", "wb")
-pickle.dump(val_labels, file_out)
-file_out.close()
-
-
-
-```
-
-```{python}
-
-test_text=nytComments17_shuffled.iloc[775724:]['commentBody'].values
-test_labels=nytComments17_shuffled.iloc[775724:]['sentiment'].values
-
-
-
-```
-
-```{python}
-
-file_out = open("test_text", "wb")
-pickle.dump(test_text, file_out)
-file_out.close()
-
-
-
-```
-
-
-```{python}
-
-
-file_out = open("test_labels", "wb")
-pickle.dump(test_labels, file_out)
-file_out.close()
-
-
-
-```
-
-
-```{python}
-
-print(f"Training Text set length:{len(train_text)}, Validation Text set length:{len(val_text)}, Testing Text set length:{len(test_text)}")
-
-
-```
-
-```{python}
-
-print(f"Training Labels set length:{len(train_labels)}, Validation Text set length:{len(val_labels)}, Testing Text set length:{len(test_labels)}")
-
-
-
-```
-
-
-```{python}
-
-train_text_small=nytComments17_shuffled_small.iloc[:203627]['commentBody'].values
-
-train_labels_small=nytComments17_shuffled_small.iloc[:203627]['sentiment'].values
-
-
-
-```
-
-
-```{python}
-
-
-
-file_out = open("train_text_small", "wb")
-pickle.dump(train_text_small, file_out)
-file_out.close()
-
-```
-
-
-```{python}
-
-
-file_out = open("train_labels_small", "wb")
-pickle.dump(train_labels_small, file_out)
-file_out.close()
-
-
-```
-
-
-
-
-
-```{python}
-
-
-
-
-val_text_small=nytComments17_shuffled_small.iloc[203627:232717]['commentBody'].values
-val_labels_small=nytComments17_shuffled_small.iloc[203627:232717]['sentiment'].values
-
-
-```
-
-
-```{python}
-
-
-file_out = open("val_text_small", "wb")
-pickle.dump(val_text_small, file_out)
-file_out.close()
-
-
-
-```
-
-
-```{python}
-
-
-file_out = open("val_labels_small", "wb")
-pickle.dump(val_labels_small, file_out)
-file_out.close()
-
-
-```
-
-
-```{python}
-
-test_text_small=nytComments17_shuffled_small.iloc[232717:]['commentBody'].values
-test_labels_small=nytComments17_shuffled_small.iloc[232717:]['sentiment'].values
-
-
-
-```
-
-
-```{python}
-
-file_out = open("test_text_small", "wb")
-pickle.dump(test_text_small, file_out)
-file_out.close()
-
-
-
-```
-
-
-```{python}
-
-file_out = open("test_labels_small", "wb")
-pickle.dump(test_labels_small, file_out)
-file_out.close()
-
+len(nyt_shuffled_small)
 
 
 ```
@@ -722,7 +525,10 @@ file_out.close()
 
 
 
-print(f"Training Text set length:{len(train_text_small)}, Validation Text set length:{len(val_text_small)}, Testing Text set length:{len(test_text_small)}")
+train, test = train_test_split(nyt_shuffled_small, test_size=0.3, stratify=nyt_shuffled_small['label'])
+
+test, validation = train_test_split(test, test_size=1/3, stratify=test['label'])
+
 
 
 ```
@@ -730,7 +536,70 @@ print(f"Training Text set length:{len(train_text_small)}, Validation Text set le
 
 ```{python}
 
-print(f"Training Labels set length:{len(train_labels_small)}, Validation Text set length:{len(val_labels_small)}, Testing Text set length:{len(test_labels_small)}")
+
+train.shape, test.shape, validation.shape
+
+
+```
+
+```{python}
+
+
+
+dataset = DatasetDict(
+    {'train':Dataset.from_pandas(train, preserve_index=False),
+    'test':Dataset.from_pandas(test, preserve_index=False),
+    'validation':Dataset.from_pandas(validation, preserve_index=False)}
+)
+
+
+
+
+```
+
+```{python}
+
+
+dataset
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{python}
+
+
+train_dataset=nyt_shuffled_small.iloc[:27150]
+
+
+
+```
+
+```{python}
+
+
+valid_dataset=nyt_shuffled_small.iloc[27150:31029]
+
+
+
+```
+
+```{python}
+
+valid_dataset['label'].value_counts(normalize=True)
 
 
 
@@ -777,6 +646,16 @@ NUM_EPOCHS = 3
 tokenizer = AutoTokenizer.from_pretrained("cardiffnlp/twitter-roberta-base-sentiment-latest")
 model = AutoModelForSequenceClassification.from_pretrained("cardiffnlp/twitter-roberta-base-sentiment-latest")
 
+
+
+```
+
+
+```{python}
+
+
+
+model.config
 
 
 ```
