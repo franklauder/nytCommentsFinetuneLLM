@@ -611,6 +611,27 @@ dataset
 
 ```{python}
 
+
+file_out = open("dataset", "wb")
+pickle.dump(dataset, file_out)
+file_out.close()
+
+
+```
+
+
+```{python}
+
+pickle_in = open("dataset", "rb")
+dataset = pickle.load(pickle_in)
+
+
+
+```
+
+
+```{python}
+
 dataset['train'][0]
 
 
@@ -645,6 +666,53 @@ def tokenize(batch):
 
 
 ```
+
+
+```{python}
+
+
+sentiment_encoded = dataset.map(tokenize, batched=True, batch_size=None)
+
+
+```
+
+
+```{python}
+
+
+
+file_out = open("sentiment_encoded", "wb")
+pickle.dump(sentiment_encoded, file_out)
+file_out.close()
+
+
+```
+
+
+
+```{python}
+
+
+pickle_in = open("sentiment_encoded", "rb")
+sentiment_encoded = pickle.load(pickle_in)
+
+
+
+```
+
+
+```{python}
+
+
+sentiment_encoded
+
+
+
+```
+
+
+Two new columns no appear. input_ids and attention_mask. 
+
 
 
 
