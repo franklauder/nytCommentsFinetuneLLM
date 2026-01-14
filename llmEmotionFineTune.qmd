@@ -45,14 +45,7 @@ from transformers.pipelines.pt_utils import KeyDataset
 from tqdm.auto import tqdm
 
 
-
-
-
-
-
 ```
-
-
 
 
 ```{python}
@@ -66,7 +59,7 @@ import torch
 
 ```{python}
 
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 import torch.nn.functional as F
 import torchtext
 from torchtext.data.utils import get_tokenizer
@@ -273,24 +266,18 @@ pd.crosstab(index=nytComments17_sentiments.newDesk, columns=nytComments17_sentim
 
 
 
-# Model Fine Tuning
-
-```{python}
+# Pre-process
 
 
-#pipe = pipeline("text-classification", model="cardiffnlp/twitter-roberta-base")
 
 
-```
-
-
-## Pre-process
+## Features
 
 
 The pre-trained model we are using has sentiment labels as: 0=negaticve, 1=neutral, 2=positive.  Since our dataset is labeled negative, neutral, and positive, we will convert them to integer values corresponding to the pre-trained model.
 
 
-### Labels
+
 
 ```{python}
 
@@ -415,42 +402,12 @@ nyt_sentiments['label'].value_counts()
 Our dataset's sentiment labels now match the pre-trained model. 
 
 
-### Train Test Validation split
+## Train Test Validation split
 
 Our dataset will be split into training, validation, and testing sets.  Before we initiate the split we will shuffle our data. 
 
 
 
-```{python}
-
-
-nytComments17_shuffled=nytComments17_sentiments2.copy()
-
-
-```
-
-
-```{python}
-nytComments17_sentiments2.head(20)
-
-
-
-
-```
-
-
-
-
-```{python}
-
-
-nyt_shuffled=nytComments17_sentiments2.sample(frac=1, random_state=42).reset_index(drop=True)
-
-
-
-
-
-```
 
 ```{python}
 
@@ -536,11 +493,97 @@ test, validation = train_test_split(test, test_size=1/3, stratify=test['label'])
 
 ```{python}
 
+file_out = open("train", "wb")
+pickle.dump(train, file_out)
+file_out.close()
+
+
+```
+
+
+```{python}
+
+
+pickle_in = open("train", "rb")
+train = pickle.load(pickle_in)
+
+
+```
+
+
+```{python}
+
+
+file_out = open("test", "wb")
+pickle.dump(test, file_out)
+file_out.close()
+
+```
+
+
+```{python}
+
+pickle_in = open("test", "rb")
+test = pickle.load(pickle_in)
+
+
+
+```
+
+
+```{python}
+
+
+file_out = open("validation", "wb")
+pickle.dump(validation, file_out)
+file_out.close()
+
+
+```
+
+
+```{python}
+
+
+pickle_in = open("validation", "rb")
+validation = pickle.load(pickle_in)
+
+
+```
+
+
+```{python}
+
 
 train.shape, test.shape, validation.shape
 
 
 ```
+
+
+
+```{python}
+
+train['label'].value_counts(normalize=True)
+
+```
+
+```{python}
+
+
+test['label'].value_counts(normalize=True)
+
+
+```
+
+```{python}
+
+validation['label'].value_counts(normalize=True)
+
+
+```
+
+## Dataset
 
 ```{python}
 
@@ -566,24 +609,9 @@ dataset
 ```
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 ```{python}
 
-
-train_dataset=nyt_shuffled_small.iloc[:27150]
-
+dataset['train'][0]
 
 
 ```
@@ -591,19 +619,37 @@ train_dataset=nyt_shuffled_small.iloc[:27150]
 ```{python}
 
 
-valid_dataset=nyt_shuffled_small.iloc[27150:31029]
+dataset['train'][1]
 
+```
+
+## Tokenize
+
+
+
+```{python}
+
+
+tokenizer = AutoTokenizer.from_pretrained("cardiffnlp/twitter-roberta-base-sentiment-latest")
 
 
 ```
 
 ```{python}
 
-valid_dataset['label'].value_counts(normalize=True)
+
+def tokenize(batch):
+    temp = tokenizer(batch['text'], padding=True, truncation=True)
+    return temp
 
 
 
 ```
+
+
+
+
+
 
 
 
@@ -640,10 +686,19 @@ NUM_EPOCHS = 3
 
 ```
 
+
 ```{python}
 
 
-tokenizer = AutoTokenizer.from_pretrained("cardiffnlp/twitter-roberta-base-sentiment-latest")
+dataset['train'][0]
+
+
+```
+
+```{python}
+
+
+
 model = AutoModelForSequenceClassification.from_pretrained("cardiffnlp/twitter-roberta-base-sentiment-latest")
 
 
