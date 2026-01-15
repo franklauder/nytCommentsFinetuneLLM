@@ -44,6 +44,22 @@ from transformers import pipeline, AutoModel, AutoTokenizer, AutoModelForSequenc
 
 ```
 
+```{python}
+
+
+import accelerate
+
+```
+
+
+```{python}
+
+
+from accelerate import Accelerator
+
+
+```
+
 
 
 
@@ -848,7 +864,13 @@ model.to(device)
 ```
 
 
+```{python}
 
+
+accelerator=Accelerator()
+
+
+```
 
 
 ## Configure  Training Arguments
@@ -863,10 +885,14 @@ training_args = TrainingArguments(
     eval_strategy="epoch",
     save_strategy="epoch",
     learning_rate=2e-5,
-    per_device_train_batch_size=batch_size,
-    per_device_eval_batch_size=batch_size,
+    per_device_train_batch_size=16,
+    per_device_eval_batch_size=16,
     num_train_epochs=3,
     weight_decay=0.01,
+    logging_dir="./logs",
+    logging_first_step=10,
+    save_steps=500,
+    disable_tqdm=False
 
 
 )
@@ -906,9 +932,14 @@ f1.features
 ```{python}
 
 def compute_metrics_evaluate(eval_pred):
-    predictions, labels = eval_pred
-    predictions = np.argmax(predictions, axis=1)
-    return accuracy.compute(predictions=predictions, references=labels), precision.compute(predictions=predictions, references=labels)
+    logits, labels = eval_pred
+    predictions = np.argmax(logits, axis=1)
+    accuracy=accuracy.compute(predictions=predictions, references=labels)["accuracy"]
+    precision=precision.compute(predictions=predictions, references=labels)["precision"]
+    recall=recall.compute(predictions=predictions, references=labels)["recall"]
+    f1=f1.compute(predictions=predictions, references=labels)["f1"]
+    return {"accuracy":accuracy, "precision":precision, "recall":recall, "f1":f1}
+
 
 
 
@@ -935,6 +966,21 @@ def compute_metrics(pred):
 
     return {"accuracy": acc, "f1": f1, "precision": prec, "recall": rec}
 
+
+
+```
+
+
+## Trainer
+
+```{python}
+
+
+trainer = Trainer(model=model, args=training_args,
+                  compute_metrics=compute_metrics,
+                  train_dataset=sentiment_encoded['train'],
+                  eval_dataset=sentiment_encoded['validation'],
+                  tokenizer=tokenizer)
 
 
 ```
