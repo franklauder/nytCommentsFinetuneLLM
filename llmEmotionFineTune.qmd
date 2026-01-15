@@ -26,12 +26,6 @@ from sklearn.model_selection import train_test_split
 
 ```
 
-```{python}
-
-import evaluate
-
-
-```
 
 
 
@@ -46,21 +40,11 @@ from transformers import pipeline, AutoModel, AutoTokenizer, AutoModelForSequenc
 
 ```{python}
 
-
 import accelerate
-
-```
-
-
-```{python}
-
-
 from accelerate import Accelerator
-
+import evaluate
 
 ```
-
-
 
 
 
@@ -85,10 +69,10 @@ import torch
 
 ```{python}
 
-from torch.utils.data import DataLoader
+#from torch.utils.data import DataLoader
 import torch.nn.functional as F
 import torchtext
-from torchtext.data.utils import get_tokenizer
+#from torchtext.data.utils import get_tokenizer
 from datasets import Dataset, DatasetDict
 
 
@@ -973,14 +957,16 @@ def compute_metrics(pred):
 
 ## Trainer
 
+#tokenizer=tokenizer)deprecated
+
 ```{python}
 
 
 trainer = Trainer(model=model, args=training_args,
-                  compute_metrics=compute_metrics,
+                  compute_metrics=compute_metrics_evaluate,
                   train_dataset=sentiment_encoded['train'],
                   eval_dataset=sentiment_encoded['validation'],
-                  tokenizer=tokenizer)
+                  processing_class=tokenizer)
 
 
 ```
