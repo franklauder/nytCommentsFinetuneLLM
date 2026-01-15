@@ -26,16 +26,26 @@ from sklearn.model_selection import train_test_split
 
 ```
 
+```{python}
+
+import evaluate
+
+
+```
+
 
 
 ```{python}
 
 
 
-from transformers import pipeline, AutoModel, AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments
+from transformers import pipeline, AutoModel, AutoTokenizer, AutoModelForSequenceClassification, AutoConfig,Trainer, TrainingArguments
 
 
 ```
+
+
+
 
 
 ```{python}
@@ -274,7 +284,7 @@ pd.crosstab(index=nytComments17_sentiments.newDesk, columns=nytComments17_sentim
 ## Features
 
 
-The pre-trained model we are using has sentiment labels as: 0=negaticve, 1=neutral, 2=positive.  Since our dataset is labeled negative, neutral, and positive, we will convert them to integer values corresponding to the pre-trained model.
+The pre-trained model we are using has sentiment labels as: 0=negative, 1=neutral, 2=positive.  Since our dataset is labeled negative, neutral, and positive, we will convert them to integer values corresponding to the pre-trained model.
 
 
 
@@ -711,6 +721,15 @@ sentiment_encoded
 ```
 
 
+```{python}
+
+
+sentiment_encoded['train']['input_ids'][0]
+
+
+```
+
+
 Two new columns no appear. input_ids and attention_mask. 
 
 
@@ -730,7 +749,23 @@ pipe=pipeline("text-classification", model="cardiffnlp/twitter-roberta-base-sent
 ```
 
 
-## Tokenization
+## Model Fine Tuning
+
+
+
+```{python}
+
+
+
+model_checkpoint = "cardiffnlp/twitter-roberta-base-sentiment-latest"
+
+
+```
+
+
+
+
+
 
 
 ```{python}
@@ -746,9 +781,7 @@ torch.manual_seed(RANDOM_SEED)
 
 ```{python}
 
-
-DEVICE=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-NUM_EPOCHS = 3
+model = AutoModelForSequenceClassification.from_pretrained(model_checkpoint, num_labels=3)
 
 
 
@@ -756,27 +789,13 @@ NUM_EPOCHS = 3
 
 
 ```{python}
-
-
-dataset['train'][0]
-
-
-```
-
-```{python}
-
-
-
-model = AutoModelForSequenceClassification.from_pretrained("cardiffnlp/twitter-roberta-base-sentiment-latest")
+model
 
 
 
 ```
 
-
 ```{python}
-
-
 
 model.config
 
@@ -785,35 +804,81 @@ model.config
 
 
 ```{python}
-
-
-
-train_encodings=tokenizer(list(train_text), truncation=True, padding=True)
-valid_encodings=tokenizer(list(val_text), truncation=True, padding=True)
-test_encodings=tokenizer(list(test_text), truncation=True, padding=True)
+model.config.id2label
 
 
 ```
 
-Create class for custom dataset. 
+
 
 ```{python}
 
-class NYTDataset(torch.utils.data.Dataset):
-    def __init__(self, encodings, labels):
-        self.encodings = encodings
-        self.labels = labels
 
-    def __getitem__(self, idx):
-        item = {key: torch.tensor(val[idx])
-            for key, val in self.encodings.items()}
-        item['labels'] = torch.tensor(self.labels[idx])
-        return item
-    def __len__(self):
-        return len(self.labels)
+DEVICE=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+NUM_EPOCHS = 3
+
 
 
 ```
+
+
+The if-else statement determines the device.
+
+```{python}
+
+
+
+if torch.backends.mps.is_available():
+    device = torch.device("mps")
+else:
+    device = torch.device(
+        "cuda" if torch.cuda.is_available() else "cpu")
+
+
+```
+
+WE move the model to the selected device
+
+```{python}
+
+model.to(device)
+
+
+```
+
+
+
+
+
+## Configure and Initialize Trainer
+
+```{python}
+
+
+
+training_args = TrainingArguments(
+    output_dir="./results",
+    overwrite_output_dir=True,
+    eval_strategy="epoch",
+    save_strategy="epoch",
+    learning_rate=2e-5,
+    per_device_train_batch_size=batch_size,
+    per_device_eval_batch_size=batch_size,
+    num_train_epochs=3,
+    weight_decay=0.01,
+
+
+)
+
+
+```
+
+
+
+
+
+
 
 
 
