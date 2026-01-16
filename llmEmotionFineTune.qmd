@@ -841,7 +841,7 @@ RANDOM_SEED=123
 
 ```{python}
 
-model = AutoModelForSequenceClassification.from_pretrained(model_checkpoint, num_labels=3)
+model = AutoModel.from_pretrained(model_checkpoint)
 
 
 
@@ -849,6 +849,7 @@ model = AutoModelForSequenceClassification.from_pretrained(model_checkpoint, num
 
 
 ```{python}
+
 model
 
 
@@ -869,44 +870,131 @@ model.config.id2label
 
 ```
 
+```{python}
+
+model.config.label2id
+
+
+```
+
+The model's id2label and label2id match hour mapping of label and label_name.
+
 
 
 ```{python}
 
 
-DEVICE=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-NUM_EPOCHS = 3
+config = AutoConfig.from_pretrained(model_checkpoint, label2id=label2id, id2label=id2label)
+
+model = AutoModelForSequenceClassification.from_pretrained(model_checkpoint, config=config).to(device)
+
+
+
+
+
+```
+
+to(device) moves the model to the selected device
+
+
+```{python}
+
+device
+
+
+
+```
+
+The output shows the device is 'cuda' meaning it is on our gpu.
+
+```{python}
+
+
+model
+
+
+```
+
+The output from the model is as we saw previously from the automodel output except now there is an out_features.m This relates to the number of possible outputs from out model (negative, neutral, positive)
+
+```{python}
+
+
+model.config
+
+
+```
+
+
+## Metrics
+
+
+```{python}
+
+
+accuracy = evaluate.load("accuracy")
+precision = evaluate.load("precision")
+recall = evaluate.load("recall")
+f1 = evaluate.load("f1")
+
+
+```
+
+```{python}
+
+
+accuracy.features
+
+```
+
+
+```{python}
+
+
+
+def compute_metrics(eval_pred):
+    predictions, labels = eval_pred
+    predictions = np.argmax(predictions, axis=1)
+    accuracy=accuracy.compute(predictions=predictions, references=labels)["accuracy"]
+    precision=precision.compute(predictions=predictions, references=labels)["precision"]
+    recall=recall.compute(predictions=predictions, references=labels)["recall"]
+    f1=f1.compute(predictions=predictions, references=labels)["f1"]
+    return {"accuracy":accuracy, "precision":precision, "recall":recall, "f1":f1}
+
+
+```
+
+
+```{python}
+
+
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
 
 
 
 ```
 
 
-The if-else statement determines the device.
-
 ```{python}
 
+def compute_metrics(pred):
+    labels = pred.label_ids
+    preds = pred.predictions.argmax(-1)
+
+    acc = accuracy_score(labels, preds)
+    prec = precision_score(labels, preds)
+    rec = recall_score(labels, preds)
+    #f1 = f1_score(labels, preds, average=None)
+
+    return {"accuracy": acc, "precision": prec, "recall": rec}
 
 
-if torch.backends.mps.is_available():
-    device = torch.device("mps")
-else:
-    device = torch.device(
-        "cuda" if torch.cuda.is_available() else "cpu")
 
 
 ```
-
-WE move the model to the selected device
-
-```{python}
-
-model.to(device)
-
-
-```
-
 
 ```{python}
 
@@ -944,75 +1032,7 @@ training_args = TrainingArguments(
 
 ```
 
-## Metrics
 
-```{python}
-
-
-accuracy = evaluate.load("accuracy")
-precision = evaluate.load("precision")
-recall = evaluate.load("recall")
-f1 = evaluate.load("f1")
-
-
-
-```
-
-```{python}
-
-precision.features
-
-
-
-```
-
-```{python}
-
-f1.features
-
-
-```
-
-```{python}
-
-def compute_metrics_evaluate(eval_pred):
-    logits, labels = eval_pred
-    predictions = np.argmax(logits, axis=1)
-    accuracy=accuracy.compute(predictions=predictions, references=labels)["accuracy"]
-    precision=precision.compute(predictions=predictions, references=labels)["precision"]
-    recall=recall.compute(predictions=predictions, references=labels)["recall"]
-    f1=f1.compute(predictions=predictions, references=labels)["f1"]
-    return {"accuracy":accuracy, "precision":precision, "recall":recall, "f1":f1}
-
-
-
-
-
-```
-
-```{python}
-
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-
-```
-
-
-```{python}
-
-def compute_metrics(pred):
-    labels = pred.label_ids
-    preds = pred.predictions.argmax(-1)
-
-    f1 = f1_score(labels, preds, average="weighted")
-    acc = accuracy_score(labels, preds)
-    prec = precision_score(labels, preds)
-    rec = recall_score(labels, preds)
-
-    return {"accuracy": acc, "f1": f1, "precision": prec, "recall": rec}
-
-
-
-```
 
 
 ## Trainer
@@ -1023,7 +1043,7 @@ def compute_metrics(pred):
 
 
 trainer = Trainer(model=model, args=training_args,
-                  compute_metrics=compute_metrics_evaluate,
+                  compute_metrics=compute_metrics,
                   train_dataset=sentiment_encoded['train'],
                   eval_dataset=sentiment_encoded['validation'],
                   processing_class=tokenizer)
