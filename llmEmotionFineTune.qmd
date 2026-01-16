@@ -768,13 +768,35 @@ sentiment_encoded['train']['input_ids'][0]
 ```
 
 
-Two new columns no appear. input_ids and attention_mask. 
+Two new columns now appear. input_ids and attention_mask. 
 
 
 
 
+```{python}
+
+label2id = {x['label_name']:x['label'] for x in dataset['train']}
+
+id2label = {v:k for  k,v in label2id.items()}
 
 
+
+
+```
+
+```{python}
+
+label2id
+
+
+```
+
+```{python}
+
+id2label
+
+
+```
 
 
 
