@@ -1071,7 +1071,7 @@ training_args = TrainingArguments(
     learning_rate=2e-5,
     per_device_train_batch_size=16,
     per_device_eval_batch_size=16,
-    num_train_epochs=3,
+    num_train_epochs=4,
     weight_decay=0.01,
     logging_dir="./logs",
     logging_first_step=10,
@@ -1110,6 +1110,45 @@ trainer.train()
 
 
 ```
+
+```{python}
+
+eval_rersults_4 = trainer.evaluate()
+
+
+
+
+
+```
+
+```{python}
+
+
+file_out = open("eval_results_4", "wb")
+pickle.dump(eval_rersults_4, file_out)
+file_out.close()
+
+
+```
+
+```{python}
+
+print(f"Evaluation results 4 epcohs: {eval_rersults_4}")
+
+
+```
+
+
+
+```{python}
+
+
+
+
+
+```
+
+
 
 
 
