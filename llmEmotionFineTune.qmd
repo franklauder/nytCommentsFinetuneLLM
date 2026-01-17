@@ -665,7 +665,7 @@ dataset = pickle.load(pickle_in)
 
 ```{python}
 
-dataset['train'][0]
+print(dataset['train'][0])
 
 
 ```
@@ -677,20 +677,7 @@ dataset['train'][1]
 
 ```
 
-```{python}
 
-
-dataset['test'][0]
-
-
-```
-
-```{python}
-
-dataset['validation'][0]
-
-
-```
 
 ## Tokenize
 
@@ -762,7 +749,7 @@ sentiment_encoded
 ```{python}
 
 
-sentiment_encoded['train']['input_ids'][0]
+print(sentiment_encoded['train']['input_ids'][0])
 
 
 ```
@@ -772,17 +759,80 @@ Two new columns now appear. input_ids and attention_mask.
 
 
 
+```{python}
+
+
+dataset['train']['label'][:6]
+
+
+
+```
+
+```{python}
+
+
+
+print(dataset['train']['label_name'][:6])
+
+```
+
+
+```{python}
+
+
+
+dataset['train'][0]
+
+```
+
+```{python}
+
+dataset['train'][1]
+
+```
+
+From the outputs we see the labels as integers and label names as characters.  As we will see later, as a requirement for the  sentiment classification model,  we will need to create a mapping between label name and labels, creating label2id and id2label variables. 
+
+ This will be accommplished using list comprehension which will map label name to label creating label2id.  then using 
+
+
+We will map the label name to label and create label2id.  Then using label2id, map label to label name. 
+
+
 
 ```{python}
 
 label2id = {x['label_name']:x['label'] for x in dataset['train']}
 
+
+```
+
+```{python}
+
+
+label2id.items()
+
+```
+
+label2id is a dictionary where the label name is a key and the label is a value. 
+
+For creating the id2label the list comprehension will interchange the key/value pairs where the key becomes values and values become keys( label is and label name is a value. 
+
+```{python}
+
 id2label = {v:k for  k,v in label2id.items()}
 
 
+```
+
+```{python}
+
+id2label.items()
 
 
 ```
+
+
 
 ```{python}
 
@@ -877,7 +927,9 @@ model.config.label2id
 
 ```
 
-The model's id2label and label2id match hour mapping of label and label_name.
+From the model configuation we see the label2id and id2label variables that we needed to create for the model.
+
+For our model configuation we will assign the model's label2id and id2label attributes to the variables we created. 
 
 
 
@@ -917,7 +969,7 @@ model
 
 ```
 
-The output from the model is as we saw previously from the automodel output except now there is an out_features.m This relates to the number of possible outputs from out model (negative, neutral, positive)
+The output from the model is as we saw previously from the automodel output except now there is an out_features. This relates to the number of possible outputs from out model (negative, neutral, positive)
 
 ```{python}
 
@@ -985,11 +1037,11 @@ def compute_metrics(pred):
     preds = pred.predictions.argmax(-1)
 
     acc = accuracy_score(labels, preds)
-    prec = precision_score(labels, preds)
-    rec = recall_score(labels, preds)
-    #f1 = f1_score(labels, preds, average=None)
+    prec = precision_score(labels, preds, average='weighted')
+    rec = recall_score(labels, preds, average='weighted')
+    f1 = f1_score(labels, preds, average='weighted')
 
-    return {"accuracy": acc, "precision": prec, "recall": rec}
+    return {"accuracy": acc, "precision": prec, "recall": rec, "f1": f1}
 
 
 
