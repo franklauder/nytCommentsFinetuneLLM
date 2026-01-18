@@ -1068,10 +1068,10 @@ training_args = TrainingArguments(
     overwrite_output_dir=True,
     eval_strategy="epoch",
     save_strategy="epoch",
-    learning_rate=2e-5,
+    learning_rate=1e-5,
     per_device_train_batch_size=16,
     per_device_eval_batch_size=16,
-    num_train_epochs=4,
+    num_train_epochs=3,
     weight_decay=0.01,
     logging_dir="./logs",
     logging_first_step=10,
@@ -1133,20 +1133,48 @@ file_out.close()
 
 ```{python}
 
-print(f"Evaluation results 4 epcohs: {eval_rersults_4}")
+print(f"Evaluation results 4 epcohs and 2e-5: {eval_rersults_4}")
 
 
 ```
+
+lowest loss was 0.19. 
 
 
 
 ```{python}
 
 
+eval_results_3 = trainer.evaluate()
+
+
+```
+
+
+```{python}
+
+
+file_out = open("eval_results_3", "wb")
+pickle.dump(eval_results_3, file_out)
+file_out.close()
+
+
+```
+
+```{python}
+
+
+print(f"Evaluation results 3 epcohs and 1e-5 learning rate: {eval_results_3}")
 
 
 
 ```
+
+
+Lowest loss was 0.325 compared to the eval_loss of 0.40. 
+
+
+
 
 
 
