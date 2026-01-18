@@ -443,6 +443,10 @@ nyt_shuffled_small=nyt_sentiments17_2.sample(frac=0.04, random_state=42).reset_i
 ```
 
 
+
+
+
+
 ```{python}
 
 file_out = open("nyt_shuffled_small", "wb")
@@ -495,6 +499,63 @@ nyt_shuffled_small.head(20)
 
 
 
+```{python}
+
+
+
+nyt_shuffled_medium=nyt_sentiments17_2.sample(frac=0.11, random_state=42).reset_index(drop=True)
+
+
+
+
+```
+
+
+```{python}
+
+
+file_out = open("nyt_shuffled_medium", "wb")
+pickle.dump(nyt_shuffled_medium, file_out)
+file_out.close()
+
+
+
+```
+
+
+```{python}
+
+
+
+pickle_in = open("nyt_shuffled_medium", "rb")
+nyt_shuffled_medium = pickle.load(pickle_in)
+
+
+```
+
+
+```{python}
+
+
+
+nyt_shuffled_medium.info()
+
+
+```
+
+
+```{python}
+
+
+
+
+nyt_shuffled_medium['label_name'].value_counts(normalize=True).round(2)
+
+
+```
+
+
+
 We will use 70% of the commenbts for the training set, 10% for the validation set, and the remaining %20 for the testing set. 
 
 
@@ -504,7 +565,7 @@ We will use 70% of the commenbts for the training set, 10% for the validation se
 
 ```{python}
 
-len(nyt_shuffled_small)
+len(nyt_shuffled_medium)
 
 
 ```
@@ -515,7 +576,7 @@ len(nyt_shuffled_small)
 
 
 
-train, test = train_test_split(nyt_shuffled_small, test_size=0.3, stratify=nyt_shuffled_small['label_name'])
+train, test = train_test_split(nyt_shuffled_medium, test_size=0.3, stratify=nyt_shuffled_medium['label_name'])
 
 test, validation = train_test_split(test, test_size=1/3, stratify=test['label_name'])
 
@@ -1068,7 +1129,7 @@ training_args = TrainingArguments(
     overwrite_output_dir=True,
     eval_strategy="epoch",
     save_strategy="epoch",
-    learning_rate=1e-5,
+    learning_rate=2e-5,
     per_device_train_batch_size=16,
     per_device_eval_batch_size=16,
     num_train_epochs=3,
@@ -1177,11 +1238,45 @@ Lowest loss was 0.325 compared to the eval_loss of 0.40.
 
 
 
+```{python}
+
+
+eval_results_medium = trainer.evaluate()
+
+
+```
+
+
+```{python}
+
+
+file_out = open("eval_results_medium", "wb")
+pickle.dump(eval_results_medium, file_out)
+file_out.close()
+
+
+```
+
+
+```{python}
 
 
 
 
+```
 
+
+
+```{python}
+
+print(f"Evaluation results 11% data sample: {eval_results_medium}")
+
+
+
+```
+
+
+loss 0.167. eval loss .024
 
 
 
