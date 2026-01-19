@@ -16,7 +16,7 @@ format: html
 ```{python}
 
 import pandas as pd
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import pickle
@@ -1520,7 +1520,7 @@ from sklearn.metrics import confusion_matrix
 
 cm=confusion_matrix(y_true, y_pred)
 
-plt.figure(figsize=(5,5))
+#plt.figure(figsize=(5,5))
 
 
 
@@ -1529,11 +1529,16 @@ plt.figure(figsize=(5,5))
 
 ```{python}
 
-sns.heatmap(cm, annot = True, xticklabels=label2id.keys(), yticklabels=label2id.keys(), fmt='d', cbar=False, cmap='Reds')
+cm=confusion_matrix(y_true, y_pred)
+
+plt.figure(figsize=(5,5))
+sns.heatmap(cm, annot = True, xticklabels=label2id.keys(), yticklabels=label2id.keys(), fmt='d',  cmap='Reds')
 plt.ylabel("Actual")
 plt.xlabel("Predicted")
 
 ```
+
+cbar=False,
 
 
 # Predicting on unlabled data
