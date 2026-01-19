@@ -1536,9 +1536,11 @@ sns.heatmap(cm, annot = True, xticklabels=label2id.keys(), yticklabels=label2id.
 plt.ylabel("Actual")
 plt.xlabel("Predicted")
 
+#cbar=False,
+
 ```
 
-cbar=False,
+The confusion matrix supports the metrics from the classification report. 
 
 
 # Predicting on unlabled data
