@@ -1234,14 +1234,25 @@ file_out.close()
 
 ```
 
+
 ```{python}
 
-print(f"Evaluation results 4 epcohs and 2e-5: {eval_rersults_4}")
+
+pickle_in = open("eval_results_4", "rb")
+eval_results_4 = pickle.load(pickle_in)
+
 
 
 ```
 
-lowest loss was 0.19. 
+```{python}
+
+print(f"Evaluation results 4 epcohs and 2e-5: {eval_results_4}")
+
+
+```
+
+Our first model was trained on 38,786 rows of data, 4 epochs and a learning rate of 2e-5.  The result was a training  loss of 0.19 and and a evaluation loss of 0.54.  evaluation accuracy, precision, recall, and f1 scores were all around 0.88.  Though these scores are not bad the difference bewtween training and evaluation loss is significant.  We train the model with different parameters on the same data. 
 
 
 
@@ -1264,17 +1275,29 @@ file_out.close()
 
 ```
 
+
 ```{python}
 
 
-print(f"Evaluation results 3 epcohs and 1e-5 learning rate: {eval_results_3}")
+
+pickle_in = open("eval_results_3", "rb")
+eval_results_3 = pickle.load(pickle_in)
+
+
+
+```
+
+```{python}
+
+
+print(f"Evaluation results 3 epochs and 1e-5 learning rate: {eval_results_3}")
 
 
 
 ```
 
 
-Lowest loss was 0.325 compared to the eval_loss of 0.40. 
+This time we changed the number of epochs to 3 and reduced the learning rate to 1e-5.  The result was a training loss loss of 0.325 and  an evaluation loss of 0.40. Though the training loss was lower, the training loss significanlt increased.  We would like to have loss scores below 0.2.  Additionally, accuracy, precision, recall, and f1 scores dropped to around 0.85.  Lowering the lerming rate did not have a positive affect on the model.  The issue could be our training data is too small which leads to the model memorizing the training data's specific patterns which causes the model to generalize to new data.  
 
 
 
@@ -1303,6 +1326,8 @@ file_out.close()
 ```{python}
 
 
+pickle_in = open("eval_results_medium", "rb")
+eval_results_medium = pickle.load(pickle_in)
 
 
 ```
@@ -1318,7 +1343,7 @@ print(f"Evaluation results 11% data sample: {eval_results_medium}")
 ```
 
 
-loss 0.167. eval loss .024
+The sample was increased to 11% of the data.  The training set is now 106,662 rows.  The additional data had a positive impact on the model as training loss dropped to 0.167. evaluation  loss  descreased to .024.  Accuracy, precision, recall, and f1 scores all increased to around 0.92.  These results moved in the right direction though we would like to close the distance between training loss and evaluation loss. 
 
 
 ```{python}
@@ -1345,6 +1370,8 @@ file_out.close()
 
 
 
+pickle_in = open("eval_results_large", "rb")
+eval_results_large = pickle.load(pickle_in)
 
 
 ```
@@ -1358,7 +1385,7 @@ print(f"Evaluation results 20% data sample: {eval_results_large}")
 ```
 
 
-training loss 0.111  eval_loss 0.146.  accuracy, precision, recall, and f1 scores all imporved to 0.96
+For this round of training we increased the sample to 20% of the data, with 135,750 rows assigned to the training data.  The reult was a training loss 0.111 and an evaluation  loss of 0.146.  accuracy, precision, recall, and f1 scores all improved  to around 0.96.  Increasing the training data to 135,750 rows provided good results as there is only a 0.035 difference between training and evaluation loss so not much over fitting. It should be noted that increasing the sample of data also had an accompaning large incrrease in evaluation runtime.  
 
 
 
@@ -1386,9 +1413,21 @@ file_out.close()
 ```{python}
 
 
+pickle_in = open("preds_output", "rb")
+preds_output = pickle.load(pickle_in)
+
+
+```
+
+
+```{python}
+
+
 preds_output.metrics
 
 ```
+
+Predicting on the test set we see that the loss is 0.144 which is similiar to the evaluation loss. This means our model is generalizing well to unseen data. 
 
 
 ### Classification Report
@@ -1434,11 +1473,35 @@ file_out.close()
 
 ```
 
+
+```{python}
+
+
+
+pickle_in = open("test_classification_rpt", "rb")
+test_classification_rpt = pickle.load(pickle_in)
+
+
+```
+
 ```{python}
 
 
 
 print(test_classification_rpt)
+
+
+```
+
+
+Using the classification report we can evaluate the test set metrics by label.  The model performs very well on predicting negative sentiment (label 0) and positive sentiment (label 2) with scores at 0.97.  The model does not perform as well on predicting neutral sentiment (label 1) with scores 0.08 to 0.07 lower than the other labels.  These are still good scores and just not at the level of the other labels. 
+
+
+```{python}
+
+
+
+
 
 
 ```
@@ -1473,7 +1536,9 @@ plt.xlabel("Predicted")
 ```
 
 
+# Predicting on unlabled data
 
+Now that we have our pre-trained model fine0tuned we will use it to predict on a new dataset.  The data includes New York Times comments from the 2018 year. 
 
 ```{python}
 
@@ -1492,23 +1557,28 @@ def get_prediction(text):
 
 ```
 
+
 ```{python}
 
 
-get_prediction
+def get_prediction(text):
+
+    input_encoded = tokenizer(text, return_tensors='pt').to(device)
+
+    with torch.no_grad():
+        outputs = model(**input_encoded)
+
+    logits = outputs.logits
+    probabilities = torch.nn.functional.softmax(logits, dim=-1)
+
+    pred = torch.argmax(probabilities, dim=-1).item()
+    return probabilities, id2label[pred]
+
 
 
 ```
 
 
-```{python}
-
-
-trainer.save_model
-
-
-
-```
 
 
 ```{python}
@@ -1524,7 +1594,7 @@ tokenizer.save_pretrained("./results/final_tokenizer")
 ```{python}
 
 
-new_model = AutoModelForSequenceClassification.from_pretrained("./final_model")
+new_model = AutoModelForSequenceClassification.from_pretrained("./results/final_model")
 
 new_tokenizer = AutoTokenizer.from_pretrained("./results/final_tokenizer")
 
@@ -1534,6 +1604,178 @@ new_tokenizer = AutoTokenizer.from_pretrained("./results/final_tokenizer")
 
 
 ```
+
+
+
+
+```{python}
+
+
+
+file_path = r'C:\Users\fvlau\OneDrive\Documents\nytCommentsFinetuneLLM\\nyt_comments18.csv'
+
+
+```
+
+
+```{python}
+
+
+nyt_sentiments18=pd.read_csv(file_path)
+
+
+```
+
+
+```{python}
+
+file_out = open("nyt_sentiments18", "wb")
+pickle.dump(nyt_sentiments18, file_out)
+file_out.close()
+
+
+```
+
+
+```{python}
+
+
+nyt_sentiments18.info()
+
+
+```
+
+
+```{python}
+
+
+nyt_sentiments18=nyt_sentiments18.dropna()
+
+
+```
+
+```{python}
+
+
+nyt_sentiments18.iloc[1,0 ]
+
+
+```
+
+
+
+
+
+```{python}
+
+
+print(nyt_sentiments18.iloc[1,0])
+get_prediction(nyt_sentiments18.iloc[1,0])
+
+
+```
+
+The output includes the comment predicted on, the probabilities of the prediction belonging to a sentiment and finally the sentiment itself.  The probabilities are returned as a tensor with the probabilites in the following order: negative, neutral, positive.  The highest probability is the middle value of 0.6642 which corresponds to the label prediction of neutral. 
+
+```{python}
+
+
+print(nyt_sentiments18.iloc[50,0])
+get_prediction(nyt_sentiments18.iloc[50,0])
+
+```
+
+Here the prediction is negative with the associated probability being the first value of 0.8756
+
+
+```{python}
+
+
+print(nyt_sentiments18.iloc[100,0])
+get_prediction(nyt_sentiments18.iloc[100,0])
+
+
+
+```
+
+```{python}
+
+print(nyt_sentiments18.iloc[200,0])
+get_prediction(nyt_sentiments18.iloc[200,0])
+
+
+```
+
+```{python}
+
+
+print(nyt_sentiments18.iloc[240,0])
+get_prediction(nyt_sentiments18.iloc[240,0])
+
+
+```
+
+```{python}
+
+print(nyt_sentiments18.iloc[310,0])
+get_prediction(nyt_sentiments18.iloc[310,0])
+
+
+```
+
+```{python}
+
+
+print(nyt_sentiments18.iloc[388,0])
+get_prediction(nyt_sentiments18.iloc[388,0])
+
+```
+
+```{python}
+
+
+print(nyt_sentiments18.iloc[399,0])
+get_prediction(nyt_sentiments18.iloc[399,0])
+
+
+```
+
+```{python}
+
+
+print(nyt_sentiments18.iloc[410,0])
+get_prediction(nyt_sentiments18.iloc[421,0])
+
+```
+
+
+```{python}
+
+
+print(nyt_sentiments18.iloc[510,0])
+get_prediction(nyt_sentiments18.iloc[510,0])
+
+
+```
+
+
+```{python}
+
+
+print(nyt_sentiments18.iloc[540,0])
+get_prediction(nyt_sentiments18.iloc[540,0])
+
+
+
+```
+
+
+
+
+
+
+
+
 
 
 
