@@ -1647,6 +1647,17 @@ file_out.close()
 ```{python}
 
 
+
+pickle_in = open("nyt_sentiments18", "rb")
+nyt_sentiments18 = pickle.load(pickle_in)
+
+
+```
+
+
+```{python}
+
+
 nyt_sentiments18.info()
 
 
@@ -1661,28 +1672,76 @@ nyt_sentiments18=nyt_sentiments18.dropna()
 
 ```
 
+
 ```{python}
 
 
-nyt_sentiments18.iloc[1,0 ]
+device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+
+```
+
+```{python}
+
+
+new_model.to(device)
+
+```
+
+We are setting the sci_mode (scientific notation) to false for easier interpretaton of probability output. 
+
+```{python}
+
+
+torch.set_printoptions(sci_mode=False)
+
+
+```
+
+```{python}
+
+
+
+
+def get_prediction(text):
+
+    """
+        Applies fine-tuned model and tokenizer to predict sentiment
+
+        Args: 
+            text: A string of text.
+
+        Returns: 
+            probabilites: predicted probability of each sentiment. Probabilites sum to 1.
+            id2label[pred]: predicted sentiment label.
+    """
+
+    input_encoded = new_tokenizer(text, return_tensors='pt').to(device)
+
+    with torch.no_grad():
+        outputs = new_model(**input_encoded)
+
+    logits = outputs.logits
+    probabilities = torch.nn.functional.softmax(logits, dim=-1)
+
+    pred = torch.argmax(probabilities, dim=-1).item()
+    return probabilities, id2label[pred]
 
 
 ```
 
 
+We created a function that will take in a string of text and return the probabilties of the predicted sentiments and the predicted sentiment label with the highest probabilty. Probabilty is the confidence we have in predicted label. 
 
 
 
-```{python}
 
 
-print(nyt_sentiments18.iloc[1,0])
-get_prediction(nyt_sentiments18.iloc[1,0])
+For comparison, we will print the text string predicted along with the model output. 
 
 
-```
 
-The output includes the comment predicted on, the probabilities of the prediction belonging to a sentiment and finally the sentiment itself.  The probabilities are returned as a tensor with the probabilites in the following order: negative, neutral, positive.  The highest probability is the middle value of 0.6642 which corresponds to the label prediction of neutral. 
+
 
 ```{python}
 
@@ -1692,7 +1751,7 @@ get_prediction(nyt_sentiments18.iloc[50,0])
 
 ```
 
-Here the prediction is negative with the associated probability being the first value of 0.8756
+Here the prediction is negative and a high confidence in the prediction with a probabilty of 0.9999.
 
 
 ```{python}
@@ -1713,6 +1772,9 @@ get_prediction(nyt_sentiments18.iloc[200,0])
 
 ```
 
+The prediction for this comment is negative though the confidnce that the models prediction is correct is only 0.4402. 
+
+
 ```{python}
 
 
@@ -1730,22 +1792,7 @@ get_prediction(nyt_sentiments18.iloc[310,0])
 
 ```
 
-```{python}
 
-
-print(nyt_sentiments18.iloc[388,0])
-get_prediction(nyt_sentiments18.iloc[388,0])
-
-```
-
-```{python}
-
-
-print(nyt_sentiments18.iloc[399,0])
-get_prediction(nyt_sentiments18.iloc[399,0])
-
-
-```
 
 ```{python}
 
@@ -1775,6 +1822,37 @@ get_prediction(nyt_sentiments18.iloc[540,0])
 
 
 ```
+
+```{python}
+
+print(nyt_sentiments18.iloc[588,0])
+get_prediction(nyt_sentiments18.iloc[588,0])
+
+
+```
+
+```{python}
+
+
+print(nyt_sentiments18.iloc[623,0])
+get_prediction(nyt_sentiments18.iloc[623,0])
+
+
+```
+
+
+Most of selection of comments have high confidence of correctly predicted.
+
+
+# Final
+
+We can now use our fine-tuned model for a number of applications. 
+
+
+
+
+
+
 
 
 
