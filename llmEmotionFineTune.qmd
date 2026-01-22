@@ -862,15 +862,9 @@ The first ouput is the original text of from the first row of the training split
 
 ## Labels
 
-There is one last step needed to prepare our data.  As will be seen later when setting up configuation,  the model requires two variables: label2id and id2label. 
-
-```{python}
+There is one last step needed to prepare our data.  As will be seen later when setting up configuation,  the model requires two variables: label2id and id2label.  As mentioned when reviewing the initial dataset, we will require a label_name and label column for creating these variables. 
 
 
-print(train.head(2))
-
-
-```
 
 
 ```{python}
@@ -883,12 +877,10 @@ dataset['train'][0]
 
 
 
-From the outputs we see the labels as integers and label names as characters.  As we will see later, as a requirement for the  sentiment classification model,  we will need to create a mapping between label name and labels, creating label2id and id2label variables. 
+From the output we see the label_name and label columns. First, label2id will be created using list comprehension.  The list comprehension creates a dictionary with key/value paris.  Label_name is the key and label is the value. Basically, this is mapping label_name to label.  
 
- This will be accommplished using list comprehension which will map label name to label creating label2id.  then using 
+ 
 
-
-We will map the label name to label and create label2id.  Then using label2id, map label to label name. 
 
 
 
@@ -906,9 +898,17 @@ label2id.items()
 
 ```
 
-label2id is a dictionary where the label name is a key and the label is a value. 
+```{python}
 
-For creating the id2label the list comprehension will interchange the key/value pairs where the key becomes values and values become keys( label is and label name is a value. 
+
+label2id
+
+```
+
+label2id has been succesfully created as seen in the output. 
+
+
+ label2id now can be used to create id2label.   list comprehension will also be used except in the case the key/value pairs will be interchanged and the key from label2id becomes values and values become keys.  This results in id2label having label as the key and label_name as the values.  
 
 ```{python}
 
@@ -925,13 +925,6 @@ id2label.items()
 ```
 
 
-
-```{python}
-
-label2id
-
-
-```
 
 ```{python}
 
@@ -1034,7 +1027,7 @@ model = AutoModelForSequenceClassification.from_pretrained(model_checkpoint, con
 
 ```
 
-to(device) moves the model to the selected device
+to(device) moves the model to the selected device, the gpu in this case. 
 
 
 ```{python}
@@ -1477,7 +1470,7 @@ print(test_classification_rpt)
 ```
 
 
-Using the classification report we can evaluate the test set metrics by label.  The model performs very well on predicting negative sentiment (label 0) and positive sentiment (label 2) with scores at 0.97.  The model does not perform as well on predicting neutral sentiment (label 1) with scores 0.08 to 0.07 lower than the other labels.  These are still good scores and just not at the level of the other labels. 
+Using the classification report we can evaluate the test set metrics by label.  The metrics show what percentage of the predictions were actually true. The model performs very well on predicting negative sentiment (label 0) and positive sentiment (label 2) with scores at 0.97.  The model does not perform as well on predicting neutral sentiment (label 1) with scores 0.08 to 0.07 lower than the other labels.  These are still good scores and just not at the level of the other labels. 
 
 
 ```{python}
@@ -1498,17 +1491,6 @@ from sklearn.metrics import confusion_matrix
 ```
 
 
-```{python}
-
-
-cm=confusion_matrix(y_true, y_pred)
-
-#plt.figure(figsize=(5,5))
-
-
-
-
-```
 
 ```{python}
 
@@ -1523,7 +1505,14 @@ plt.xlabel("Predicted")
 
 ```
 
-The confusion matrix supports the metrics from the classification report. 
+```{python}
+
+
+plt.show()
+
+```
+
+The confusion matrix is a visual representation of how our model performed on predicting on the test set. The actual value is on the x axis and the predicted value is on the y axis.  If we look at negative sentiment the large number represents how many negative sentiment predictions were true.  If we follow the actual negative sentiment  the matirx we see lower values, meaning few negative sentiment, fewer negative sentiments were incorrectly predicted as either neutral or positve sentiments (false positives).  Neutral sentiment has a higher number of incorrect 
 
 
 # Predicting on unlabled data
