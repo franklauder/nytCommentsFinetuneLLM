@@ -721,6 +721,8 @@ validation['label_name'].value_counts(normalize=True).round(2)
 
 ## Dataset
 
+We must make the format of our  data compatible with the transformers in Hugging Face,  This can be done by using the DatasetDict function which creates a  dictionary-like container.  We will use it to hold our train, test, and validation splits.  
+
 ```{python}
 
 
@@ -736,13 +738,6 @@ dataset = DatasetDict(
 
 ```
 
-```{python}
-
-
-dataset
-
-
-```
 
 
 ```{python}
@@ -768,7 +763,9 @@ dataset = pickle.load(pickle_in)
 
 ```{python}
 
-print(dataset['train'][0])
+
+
+type(dataset)
 
 
 ```
@@ -776,15 +773,29 @@ print(dataset['train'][0])
 ```{python}
 
 
-dataset['train'][1]
+dataset
 
 ```
+
+The dataset has a dictionary structure where the train, test,validation splits are the names of the keys and the values are features: test, label_name, and label. 
+
+
+```{python}
+
+print(dataset['train'][0])
+
+
+```
+
+Filtering on the train key and first values we see the text, label_name, and label. 
+
 
 
 
 ## Tokenize
 
 
+Tokenization breaks text into manageable units or tokens.  Tokenization helps preprocess text data, simplifying tasks such as filtering out punctuation, converting to lowercase, and handling special characters.  It also transforms text into numerical IDs which transformers and LLMs require. Tokenization has different methods such as spliting text into individual words,spliting words into subwords, and breaking text into individual characters.  For our model we will split our data into individual words. 
 
 ```{python}
 
@@ -848,17 +859,29 @@ sentiment_encoded
 
 ```
 
+There are now two new columns in data dictionary: input_ids and attention_mask. 
+
+Let's compare a row of the text column and the new input_ids columns. 
+
+
 
 ```{python}
 
 
-print(sentiment_encoded['train']['input_ids'][0])
+print(sentiment_encoded['train'][0]['text'])
 
 
 ```
 
+```{python}
 
-Two new columns now appear. input_ids and attention_mask. 
+
+print(sentiment_encoded['train'][0]['input_ids'])
+
+
+```
+
+The first ouput is the original text of from the first row of the training split.  The first seventeen characters from the second output are the tokens assigned to the words from the text column. 
 
 
 
@@ -1846,7 +1869,7 @@ Most of selection of comments have high confidence of correctly predicted.
 
 # Final
 
-We can now use our fine-tuned model for a number of applications. 
+ Our fine-tuned model can be used in a number of ways. We can build a streamlit application with our model which will allow users to have a user interface to upload text for sentiment prediction.  Our model can alos be used as part of an AI Agent.   
 
 
 
