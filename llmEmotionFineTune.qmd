@@ -93,6 +93,8 @@ torch.cuda.is_available()
 
 ```
 
+The 'True' ouput means the gpu is available.
+
 
 ```{python}
 
@@ -666,7 +668,19 @@ validation = pickle.load(pickle_in)
 ```{python}
 
 
-train.shape, test.shape, validation.shape
+train_shape=train.shape
+test_shape= test.shape
+validation_shape=validation.shape
+
+
+```
+
+
+```{python}
+
+
+print(f"Train Set Shape: {train_shape}, Test Set Shape: {test_shape} Validation Set Shape: {validation_shape}")
+
 
 
 ```
@@ -696,7 +710,7 @@ validation['label_name'].value_counts(normalize=True).round(2)
 
 ## Dataset
 
-We must make the format of our  data compatible with the transformers in Hugging Face,  This can be done by using the DatasetDict function which creates a  dictionary-like container.  We will use it to hold our train, test, and validation splits.  
+We must make the format of our  data compatible with the transformers from Hugging Face,  This can be done by using the DatasetDict function which creates a  dictionary-like container.  We will use it to hold our train, test, and validation splits.  
 
 ```{python}
 
@@ -856,13 +870,13 @@ print(sentiment_encoded['train'][0]['input_ids'])
 
 ```
 
-The first ouput is the original text of from the first row of the training split.  The first seventeen characters from the second output are the tokens assigned to the words from the text column. 
+The first ouput is the original text of from the first row of the training split.  From the second output we want to focus on the first seventeen charactersare which are the  tokens assigned to the words from the text column. 
 
 
 
 ## Labels
 
-There is one last step needed to prepare our data.  As will be seen later when setting up configuation,  the model requires two variables: label2id and id2label.  As mentioned when reviewing the initial dataset, we will require a label_name and label column for creating these variables. 
+There is one last step needed to prepare our data.  As will be seen later when setting up configuation,  the model requires two variables: label2id and id2label.  As mentioned when reviewing the initial dataset, we will require a label_name column and label column for creating these variables. 
 
 
 
@@ -877,7 +891,9 @@ dataset['train'][0]
 
 
 
-From the output we see the label_name and label columns. First, label2id will be created using list comprehension.  The list comprehension creates a dictionary with key/value paris.  Label_name is the key and label is the value. Basically, this is mapping label_name to label.  
+From the output we see the label_name and label columns. We will use list comprehension to create these variables.  A list comprehension is a concise way to create a list from another list. 
+
+First, label2id will be created   The list comprehension will create a dictionary with key/value paris.  Label_name is the key and label is the value. Basically, this is mapping label_name to label.  
 
  
 
@@ -908,7 +924,7 @@ label2id
 label2id has been succesfully created as seen in the output. 
 
 
- label2id now can be used to create id2label.   list comprehension will also be used except in the case the key/value pairs will be interchanged and the key from label2id becomes values and values become keys.  This results in id2label having label as the key and label_name as the values.  
+ Now we will use label2id to create id2label. The difference in using list comprehension in this case is the key/value pairs will be interchanged and the key from label2id becomes values and values become keys.  This results in id2label having label as the key and label_name as the values.  
 
 ```{python}
 
@@ -1482,6 +1498,15 @@ Using the classification report we can evaluate the test set metrics by label.  
 
 ```
 
+### Confusion Matrix
+
+The confusion matrix is a visual representation of how our model performed on predicting on the test set. It shows how many predictions were correct (True Negatives/Neutrals/Positives,) versus incorect (False Negatives/Neutrals) when compared to actual outcomes.
+
+
+    
+
+
+
 
 ```{python}
 
@@ -1512,7 +1537,80 @@ plt.show()
 
 ```
 
-The confusion matrix is a visual representation of how our model performed on predicting on the test set. It shows how many predictions were correct (TruePositives/Negatives) versus incorect (False Positives/Negatives) when compared to actual outcomes. The actual outcomes are on the x axis and the predictions are on the y axis.  If we look at negative sentiment the large number in the upper left of the matrix represents how many negative sentiment predictions were correct (true positve).  If we follow the  negative sentiment acrossthe matrix we see lower values for predicted neutral and positive sentiments. This is interpreted as the model had fewer incorrect predictions of positve or negative sentimenbt when the actual outcome was negative (false negative). Following  negative on vertically, the lower values mean the model had fewer incorrect predictions of negative sentiment when the actual outcome was neutral or positive. The model follows the same pattern for positive sentiment. The model was less accurate on neutral sentiment predictions as we see the number of false positives and false negatives  are higher as a percentage of total predictions when compared to the other sentiments. 
+
+Let's interpret the confusion matrix. 
+    The target varible has three values: Negative, Neutral, or Positive
+    The columns represent the actual values of the target variable
+    The rows represent the predicted values of the target variable. 
+
+
+Terms for confusion matrix:
+
+We should note that most confusion matrixes have just a postive and negative class.  Our model has three classes with neurtal being the additional class. 
+
+True Positive (TP) 
+
+    The predicted value matches the actual value.
+    The actual value was positive, and the model predicted a positive value.
+
+True Negative (TN) 
+
+    The predicted value matches the actual value
+    The actual value was negative, and the model predicted a negative value.
+
+True Neutral (TL) 
+
+    The predicted value matches the actual value
+    The actual value was neutral, and the model predicted a neutral value.
+
+
+False Positive (FP) 
+
+    The predicted value was falsely predicted.
+    The actual value was negative or neutral, but the model predicted a  positive value.
+   
+False Negative (FN) 
+
+    The predicted value was falsely predicted.
+    The actual value was neutral or positive, but the model predicted a negative value.
+   
+
+False Neutral (FL)
+
+    The predicted value was falsely predicted.
+    The actual value was negative or positive, but the model predicted a neutral value.
+    
+
+
+Appyling these terms to our confusion matrix we find:
+
+True Negative (TN) = 16,342, meaning our model correctly classified 16,342 negative class data points. 
+True Neutral (TL) = 5,191, meaning our model correctly classified 5,191 neutral class data points. 
+True Positive (TP) = 15,849, meaning our model correctly classified 15,849 positve class data points. 
+False Negative (FN) = 267,72, meaning the model incorrectly classified 267 neutral and 72  positive class data points as belonging to the negative class.
+False Neutral (FL) = 368,238, meaning the model incorrectly classified 368 negative and 238  positive class data points as belonging to the neutral class.
+
+
+We can put these numbers in perspective by using percentages for total predictions for each class. 
+
+Of the total predictions for the negative class, 98% were correctly predicted as the negative class, 2% were incorrectly predicted as the neutral class and less than 1% were incorrectly predicted as the positive class. 
+
+Of the total predictions for the neutral class, 89% were correctly predicted as the neutral class, 6% were incorrectly predicted as the negative class, and 4% were incorrectly predicted as the positive class. 
+
+Of the total predictions for the positive class, 97% were correctly predicted as the positve class, less than 1% were incorrectly predicted as the negative class, and 2% were incorrectly predicted as the neutral class. 
+
+The insight we gain from these results is the model is excellent at predicting positive and negative sentiment.  The model is not as strong at predicting the neutral class though the results are still considered good. 
+
+
+
+
+   
+
+
+
+
+
+    
 
 
 # Predicting on unlabled data
