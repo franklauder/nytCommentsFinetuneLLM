@@ -1,6 +1,12 @@
 ---
-title: "Fine Tuning LLM Emotion Predictions on New ork Times 2017 Comments"
-format: html
+title: "LLM Fine Tuning-New York Times Comments(2017)"
+author: "Francis Lauder"
+date: '2026-01-24'
+format: 
+    html:
+        toc: true
+        number-sections: false
+        toc-location: left
 ---
 
 # Introduction
@@ -14,6 +20,8 @@ First we’ll review what a pre-trained model is.  A LLM is trained on a broad
 ## Libraries
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -27,6 +35,8 @@ from sklearn.model_selection import train_test_split
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 
@@ -36,6 +46,8 @@ from transformers import pipeline, AutoModel, AutoTokenizer, AutoModelForSequenc
 ```
 
 ```{python}
+#| eval: true
+#| echo: false
 
 import accelerate
 from accelerate import Accelerator
@@ -44,27 +56,23 @@ import evaluate
 ```
 
 ```{python}
+#| eval: true
+#| echo: false
 
-
-from transformers.pipelines.pt_utils import KeyDataset
 from tqdm.auto import tqdm
 
 
 ```
 
+
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
+
 
 import torch
-
-
-```
-
-```{python}
-
-#from torch.utils.data import DataLoader
 import torch.nn.functional as F
 import torchtext
-#from torchtext.data.utils import get_tokenizer
 from datasets import Dataset, DatasetDict
 
 
@@ -74,7 +82,8 @@ from datasets import Dataset, DatasetDict
 ```
 
 ```{python}
-
+#| code-fold: true
+#| code-summary: "Show Code"
 
 torch.cuda.is_available()
 
@@ -85,6 +94,8 @@ torch.cuda.is_available()
 The 'True' output means the gpu is available.
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 
@@ -94,6 +105,8 @@ file_path = r'C:\Users\fvlau\OneDrive\Documents\nytCommentsFinetuneLLM\\nyt_comm
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 nyt_sentiments17=pd.read_csv(file_path)
@@ -105,6 +118,8 @@ nyt_sentiments17=pd.read_csv(file_path)
 ## Data Review
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 
@@ -116,7 +131,8 @@ file_out.close()
 ```
 
 ```{python}
-
+#| eval: true
+#| echo: false
 
 pickle_in = open("nyt_sentiments17", "rb")
 nyt_sentiments17 = pickle.load(pickle_in)
@@ -125,6 +141,8 @@ nyt_sentiments17 = pickle.load(pickle_in)
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 
@@ -135,6 +153,8 @@ nyt_sentiments17.info()
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 print(nyt_sentiments17.head(2))
@@ -144,6 +164,8 @@ print(nyt_sentiments17.head(2))
 We used the .info() method to display the column names and the .head() method to display the first two rows. It is important to note that when configuring the pre-trained model, we will need the sentiment column, which is the label name, and the label column which is the numerical representation of the sentiment column. For the pre-trained model we have selected, if both columns are not the dataset, training the model will result in an error. In the pre-processing steps we will see why.
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 print(nyt_sentiments17.shape)
@@ -153,6 +175,8 @@ print(nyt_sentiments17.shape)
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 print(nyt_sentiments17["sentiment"].value_counts())
 
@@ -160,6 +184,8 @@ print(nyt_sentiments17["sentiment"].value_counts())
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 print(nyt_sentiments17["sentiment"].value_counts(normalize=True).round(2))
 
@@ -167,6 +193,8 @@ print(nyt_sentiments17["sentiment"].value_counts(normalize=True).round(2))
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 nyt_sentiments17["sentiment"].value_counts(normalize=True).round(2).plot(kind='bar')
 
@@ -177,6 +205,8 @@ nyt_sentiments17["sentiment"].value_counts(normalize=True).round(2).plot(kind='b
 The percentage breakdown of sentiment is negative 43%, positive 42%, and neutral 15%. We will need to keep these percentages during the sampling of the data and splitting it into train, test, and validation sets.
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 print(nyt_sentiments17["typeOfMaterial"].value_counts(normalize=True).round(2))
@@ -185,6 +215,8 @@ print(nyt_sentiments17["typeOfMaterial"].value_counts(normalize=True).round(2))
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 
@@ -194,53 +226,11 @@ print(nyt_sentiments17["newDesk"].value_counts(normalize=True).round(2))
 
 ```
 
-```{python}
 
-
-
-crashes=sns.load_dataset("car_crashes")
-
-
-```
 
 ```{python}
-
-
-
-crashes.head()
-
-
-
-```
-
-```{python}
-
-
-
-print(nytComments17_sentiments[["typeOfMaterial", "sentiment"]].value_counts(normalize=True))
-
-
-```
-
-```{python}
-
-
-print(nytComments17_sentiments[["newDesk", "sentiment"]].value_counts(normalize=True))
-
-
-
-```
-
-```{python}
-
-
-nytComments17_sentiments.groupby(['typeOfMaterial', 'sentiment'])['sentiment'].count()
-
-
-
-```
-
-```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 
@@ -255,6 +245,8 @@ nytComments17_sentiments.groupby(['typeOfMaterial', 'sentiment'])['sentiment'].c
 ## Features
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 nyt_sentiments17_2 = nyt_sentiments17.copy()
@@ -263,6 +255,8 @@ nyt_sentiments17_2 = nyt_sentiments17.copy()
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 nyt_sentiments17_2.info()
 
@@ -272,7 +266,8 @@ nyt_sentiments17_2.info()
 We will rename the columns sentiment and commentBody to reflect those used in the pre-trained model
 
 ```{python}
-
+#| code-fold: true
+#| code-summary: "Show Code"
 
 nyt_comments_dict = {"commentBody":"text", "sentiment":"label_name"}
 
@@ -280,6 +275,8 @@ nyt_comments_dict = {"commentBody":"text", "sentiment":"label_name"}
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 nyt_sentiments17_2 = nyt_sentiments17_2.rename(columns={"clean_comments":"text", "sentiment":"label_name"})
 
@@ -288,6 +285,8 @@ nyt_sentiments17_2 = nyt_sentiments17_2.rename(columns={"clean_comments":"text",
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 nyt_sentiments17_2.info()
 
@@ -298,6 +297,8 @@ nyt_sentiments17_2.info()
 Columns not required for fine tuning and prediction will be dropped
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 nyt_sentiments17_2=nyt_sentiments17_2.drop(columns=['commentBody','commentID', 'typeOfMaterial', 'newDesk','sentiment_score'], axis=1)
@@ -305,7 +306,8 @@ nyt_sentiments17_2=nyt_sentiments17_2.drop(columns=['commentBody','commentID', '
 ```
 
 ```{python}
-
+#| code-fold: true
+#| code-summary: "Show Code"
 
 nyt_sentiments17_2.info()
 
@@ -313,6 +315,8 @@ nyt_sentiments17_2.info()
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 file_out=open("nyt_sentiments17_2", "wb")
@@ -323,6 +327,8 @@ file_out.close()
 ```
 
 ```{python}
+#| eval: true
+#| echo: false
 
 pickle_in = open("nyt_sentiments17_2", "rb")
 nyt_sentiments17_2 = pickle.load(pickle_in)
@@ -331,6 +337,8 @@ nyt_sentiments17_2 = pickle.load(pickle_in)
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 
@@ -341,6 +349,8 @@ nyt_sentiments17_2['label'].value_counts(normalize=True).round(2)
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 nyt_sentiments17_2['label_name'].value_counts(normalize=True).round(2)
@@ -355,6 +365,8 @@ Our dataset's sentiment labels now match the pre-trained model.
 Our dataset will be split into training, validation, and testing sets. Before we initiate the split we will shuffle our data.
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 nyt_shuffled_small=nyt_sentiments17_2.sample(frac=0.04, random_state=42).reset_index(drop=True)
@@ -364,6 +376,8 @@ nyt_shuffled_small=nyt_sentiments17_2.sample(frac=0.04, random_state=42).reset_i
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 file_out = open("nyt_shuffled_small", "wb")
 pickle.dump(nyt_shuffled_small, file_out)
@@ -374,6 +388,8 @@ file_out.close()
 ```
 
 ```{python}
+#| eval: true
+#| echo: false
 
 pickle_in = open("nyt_shuffled_small", "rb")
 nyt_shuffled_small = pickle.load(pickle_in)
@@ -382,31 +398,11 @@ nyt_shuffled_small = pickle.load(pickle_in)
 
 ```
 
-```{python}
 
-nyt_shuffled_small.info()
-
-
-
-```
 
 ```{python}
-
-
-nyt_shuffled_small['label_name'].value_counts(normalize=True).round(2)
-
-
-```
-
-```{python}
-
-
-
-nyt_shuffled_small.head(20)
-
-```
-
-```{python}
+#| eval: false
+#| echo: false
 
 
 
@@ -418,6 +414,8 @@ nyt_shuffled_medium=nyt_sentiments17_2.sample(frac=0.11, random_state=42).reset_
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 file_out = open("nyt_shuffled_medium", "wb")
@@ -429,6 +427,8 @@ file_out.close()
 ```
 
 ```{python}
+#| eval: true
+#| echo: false
 
 
 
@@ -438,35 +438,16 @@ nyt_shuffled_medium = pickle.load(pickle_in)
 
 ```
 
-```{python}
 
 
-
-nyt_shuffled_medium.info()
-
-
-```
-
-```{python}
-
-
-
-
-nyt_shuffled_medium['label_name'].value_counts(normalize=True).round(2)
-
-
-```
 
 We will use 70% of the comments for the training set, 10% for the validation set, and the remaining %20 for the testing set.
 
-```{python}
 
-len(nyt_shuffled_medium)
-
-
-```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 
@@ -476,6 +457,10 @@ nyt_shuffled_large = nyt_sentiments17_2.sample(frac=0.2, random_state=42).reset_
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| eval: false
+
 
 
 nyt_shuffled_large = nyt_shuffled_large.dropna()
@@ -484,6 +469,8 @@ nyt_shuffled_large = nyt_shuffled_large.dropna()
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 file_out = open("nyt_shuffled_large", "wb")
@@ -494,6 +481,22 @@ file_out.close()
 ```
 
 ```{python}
+#| eval: true
+#| echo: false
+
+
+
+pickle_in = open("nyt_shuffled_large", "rb")
+nyt_shuffled_large = pickle.load(pickle_in)
+
+
+
+```
+
+```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
+
 
 
 nyt_shuffled_large.info()
@@ -503,6 +506,8 @@ nyt_shuffled_large.info()
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 
@@ -515,6 +520,8 @@ test, validation = train_test_split(test, test_size=1/3, stratify=test['label_na
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 file_out = open("train", "wb")
 pickle.dump(train, file_out)
@@ -524,6 +531,8 @@ file_out.close()
 ```
 
 ```{python}
+#| eval: true
+#| echo: false
 
 
 pickle_in = open("train", "rb")
@@ -533,6 +542,8 @@ train = pickle.load(pickle_in)
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 file_out = open("test", "wb")
@@ -542,6 +553,8 @@ file_out.close()
 ```
 
 ```{python}
+#| eval: true
+#| echo: false
 
 pickle_in = open("test", "rb")
 test = pickle.load(pickle_in)
@@ -551,6 +564,8 @@ test = pickle.load(pickle_in)
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 file_out = open("validation", "wb")
@@ -561,6 +576,8 @@ file_out.close()
 ```
 
 ```{python}
+#| eval: true
+#| echo: false
 
 
 pickle_in = open("validation", "rb")
@@ -570,6 +587,8 @@ validation = pickle.load(pickle_in)
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 train_shape=train.shape
@@ -580,6 +599,8 @@ validation_shape=validation.shape
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 print(f"Train Set Shape: {train_shape}, Test Set Shape: {test_shape} Validation Set Shape: {validation_shape}")
@@ -589,12 +610,17 @@ print(f"Train Set Shape: {train_shape}, Test Set Shape: {test_shape} Validation 
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 train['label_name'].value_counts(normalize=True).round(2)
 
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
+
 
 
 test['label_name'].value_counts(normalize=True).round(2)
@@ -603,6 +629,8 @@ test['label_name'].value_counts(normalize=True).round(2)
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 validation['label_name'].value_counts(normalize=True).round(2)
 
@@ -614,6 +642,8 @@ validation['label_name'].value_counts(normalize=True).round(2)
 We must make the format of our data compatible with the transformers from Hugging Face, This can be done by using the DatasetDict function which creates a dictionary-like container. We will use it to hold our train, test, and validation splits.
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 
@@ -629,6 +659,8 @@ dataset = DatasetDict(
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 file_out = open("dataset", "wb")
@@ -639,6 +671,8 @@ file_out.close()
 ```
 
 ```{python}
+#| eval: true
+#| echo: false
 
 pickle_in = open("dataset", "rb")
 dataset = pickle.load(pickle_in)
@@ -648,6 +682,8 @@ dataset = pickle.load(pickle_in)
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 
@@ -657,6 +693,8 @@ type(dataset)
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 dataset
@@ -666,6 +704,8 @@ dataset
 The dataset has a dictionary structure where the train, test,validation splits are the names of the keys and the values are features: test, label_name, and label.
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 print(dataset['train'][0])
 
@@ -679,6 +719,8 @@ Filtering on the train key and first values we see the text, label_name, and lab
 Tokenization breaks text into manageable units or tokens. Tokenization helps pre-process text data, simplifying tasks such as filtering out punctuation, converting to lowercase, and handling special characters. It also transforms text into numerical IDs which transformers and LLMs require. Tokenization has different methods such as splitting text into individual words,splitting words into sub-words, and breaking text into individual characters. For our model we will split our data into individual words.
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 tokenizer = AutoTokenizer.from_pretrained("cardiffnlp/twitter-roberta-base-sentiment-latest")
@@ -687,6 +729,8 @@ tokenizer = AutoTokenizer.from_pretrained("cardiffnlp/twitter-roberta-base-senti
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 def tokenize(batch):
@@ -697,7 +741,11 @@ def tokenize(batch):
 
 ```
 
+Apply the function to the dataset
+
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 sentiment_encoded = dataset.map(tokenize, batched=True, batch_size=None)
@@ -706,6 +754,8 @@ sentiment_encoded = dataset.map(tokenize, batched=True, batch_size=None)
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 
@@ -717,6 +767,8 @@ file_out.close()
 ```
 
 ```{python}
+#| eval: true
+#| echo: false
 
 
 pickle_in = open("sentiment_encoded", "rb")
@@ -727,6 +779,8 @@ sentiment_encoded = pickle.load(pickle_in)
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 sentiment_encoded
@@ -740,6 +794,8 @@ There are now two new columns in data dictionary: input_ids and attention_mask.
 Let's compare a row of the text column and the new input_ids columns.
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 print(sentiment_encoded['train'][0]['text'])
@@ -748,6 +804,8 @@ print(sentiment_encoded['train'][0]['text'])
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 print(sentiment_encoded['train'][0]['input_ids'])
@@ -759,9 +817,11 @@ The first output is the original text of from the first row of the training spli
 
 ## Labels
 
-There is one last step needed to prepare our data. As will be seen later when setting up configuration, the model requires two variables: label2id and id2label. As mentioned when reviewing the initial dataset, we will require a label_name column and label column for creating these variables.
+There is one last step needed to prepare our data. As will be seen later when setting up the configuration, the model requires two variables: label2id and id2label. As mentioned when reviewing the initial dataset, we will require a label_name column and label column for creating these variables.
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 
@@ -774,6 +834,8 @@ From the output we see the label_name and label columns. We will use list compre
 First, label2id will be created The list comprehension will create a dictionary with key/value pairs. Label_name is the key and label is the value. Basically, this is mapping label_name to label.
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 label2id = {x['label_name']:x['label'] for x in dataset['train']}
 
@@ -781,6 +843,8 @@ label2id = {x['label_name']:x['label'] for x in dataset['train']}
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 label2id.items()
@@ -788,6 +852,8 @@ label2id.items()
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 label2id
@@ -799,6 +865,8 @@ label2id has been successfully created as seen in the output.
 Now we will use label2id to create id2label. The difference in using list comprehension in this case is the key/value pairs will be interchanged and the key from label2id becomes values and values become keys. This results in id2label having label as the key and label_name as the values.
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 id2label = {v:k for  k,v in label2id.items()}
 
@@ -806,6 +874,8 @@ id2label = {v:k for  k,v in label2id.items()}
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 id2label.items()
 
@@ -813,6 +883,8 @@ id2label.items()
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 id2label
 
@@ -821,7 +893,11 @@ id2label
 
 ## Model Fine Tuning
 
+We will create a model checkpoint which is simply the chosen Hugging Face pre-trined model.  Creating the model_checkpoint object makes it easier to aplly the model in process steps. 
+
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 
@@ -831,6 +907,8 @@ model_checkpoint = "cardiffnlp/twitter-roberta-base-sentiment-latest"
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 
@@ -842,6 +920,8 @@ RANDOM_SEED=123
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 model = AutoModel.from_pretrained(model_checkpoint)
 
@@ -850,6 +930,8 @@ model = AutoModel.from_pretrained(model_checkpoint)
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 model
 
@@ -858,6 +940,8 @@ model
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 model.config
 
@@ -865,12 +949,16 @@ model.config
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 model.config.id2label
 
 
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 model.config.label2id
 
@@ -882,6 +970,8 @@ From the model configuration we see the label2id and id2label variables that we 
 For our model configuration we will assign the model's label2id and id2label attributes to the variables we created.
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -899,6 +989,8 @@ model = AutoModelForSequenceClassification.from_pretrained(model_checkpoint, con
 to(device) moves the model to the selected device, the gpu in this case.
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 device
 
@@ -909,6 +1001,8 @@ device
 The output shows the device is 'cuda' meaning it is on our gpu.
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 model
@@ -919,6 +1013,8 @@ model
 The output from the model is as we saw previously from the automodel output except now there is an out_features. This relates to the number of possible outputs from out model (negative, neutral, positive)
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 model.config
@@ -929,6 +1025,8 @@ model.config
 ## Metrics
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 accuracy = evaluate.load("accuracy")
@@ -940,6 +1038,8 @@ f1 = evaluate.load("f1")
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 accuracy.features
@@ -947,6 +1047,8 @@ accuracy.features
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 
@@ -963,6 +1065,8 @@ def compute_metrics(eval_pred):
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
@@ -973,6 +1077,8 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 def compute_metrics(pred):
     labels = pred.label_ids
@@ -991,6 +1097,8 @@ def compute_metrics(pred):
 ```
 
 ```{python}
+#| eval: true
+#| echo: false
 
 
 accelerator=Accelerator()
@@ -1001,6 +1109,8 @@ accelerator=Accelerator()
 ## Configure Training Arguments
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 
@@ -1025,11 +1135,22 @@ training_args = TrainingArguments(
 
 ```
 
-## Trainer
+```{python}
+#| eval: false
+#| echo: false
+
 
 #tokenizer=tokenizer)deprecated
 
+```
+
+## Trainer
+
+
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
+
 
 
 trainer = Trainer(model=model, args=training_args,
@@ -1042,6 +1163,8 @@ trainer = Trainer(model=model, args=training_args,
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 trainer.train()
 
@@ -1049,6 +1172,8 @@ trainer.train()
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 eval_rersults_4 = trainer.evaluate()
 
@@ -1059,6 +1184,8 @@ eval_rersults_4 = trainer.evaluate()
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 file_out = open("eval_results_4", "wb")
@@ -1069,6 +1196,8 @@ file_out.close()
 ```
 
 ```{python}
+#| eval: true
+#| echo: false
 
 
 pickle_in = open("eval_results_4", "rb")
@@ -1079,6 +1208,8 @@ eval_results_4 = pickle.load(pickle_in)
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 print(f"Evaluation results 4 epcohs and 2e-5: {eval_results_4}")
 
@@ -1088,6 +1219,8 @@ print(f"Evaluation results 4 epcohs and 2e-5: {eval_results_4}")
 Our first model was trained on 38,786 rows of data, 4 epochs and a learning rate of 2e-5. The result was a training loss of 0.19 and and a evaluation loss of 0.54. evaluation accuracy, precision, recall, and f1 scores were all around 0.88. Though these scores are not bad the difference between training and evaluation loss is significant. We train the model with different parameters on the same data.
 
 ```{python}
+#| eval: true
+#| echo: false
 
 
 eval_results_3 = trainer.evaluate()
@@ -1096,6 +1229,8 @@ eval_results_3 = trainer.evaluate()
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 file_out = open("eval_results_3", "wb")
@@ -1106,6 +1241,8 @@ file_out.close()
 ```
 
 ```{python}
+#| eval: true
+#| echo: false
 
 
 
@@ -1117,6 +1254,8 @@ eval_results_3 = pickle.load(pickle_in)
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 print(f"Evaluation results 3 epochs and 1e-5 learning rate: {eval_results_3}")
@@ -1128,6 +1267,8 @@ print(f"Evaluation results 3 epochs and 1e-5 learning rate: {eval_results_3}")
 This time we changed the number of epochs to 3 and reduced the learning rate to 1e-5. The result was a training loss loss of 0.325 and an evaluation loss of 0.40. Though the training loss was lower, the training loss significant increased. We would like to have loss scores below 0.2. Additionally, accuracy, precision, recall, and f1 scores dropped to around 0.85. Lowering the learning rate did not have a positive affect on the model. The issue could be our training data is too small which leads to the model memorizing the training data's specific patterns which causes the model to generalize to new data.
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 eval_results_medium = trainer.evaluate()
@@ -1136,6 +1277,8 @@ eval_results_medium = trainer.evaluate()
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 file_out = open("eval_results_medium", "wb")
@@ -1146,6 +1289,8 @@ file_out.close()
 ```
 
 ```{python}
+#| eval: true
+#| echo: false
 
 
 pickle_in = open("eval_results_medium", "rb")
@@ -1155,6 +1300,8 @@ eval_results_medium = pickle.load(pickle_in)
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 print(f"Evaluation results 11% data sample: {eval_results_medium}")
 
@@ -1165,6 +1312,9 @@ print(f"Evaluation results 11% data sample: {eval_results_medium}")
 The sample was increased to 11% of the data. The training set is now 106,662 rows. The additional data had a positive impact on the model as training loss dropped to 0.167. evaluation loss decreased to .024. Accuracy, precision, recall, and f1 scores all increased to around 0.92. These results moved in the right direction though we would like to close the distance between training loss and evaluation loss.
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| eval: false
 
 eval_results_large = trainer.evaluate()
 
@@ -1172,6 +1322,8 @@ eval_results_large = trainer.evaluate()
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 file_out = open("eval_results_large", "wb")
@@ -1183,6 +1335,8 @@ file_out.close()
 ```
 
 ```{python}
+#| eval: true
+#| echo: false
 
 
 
@@ -1193,6 +1347,8 @@ eval_results_large = pickle.load(pickle_in)
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 print(f"Evaluation results 20% data sample: {eval_results_large}")
@@ -1204,12 +1360,17 @@ For this round of training we increased the sample to 20% of the data, with 135,
 ## Test Set Metrtics
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| eval: false
 
 preds_output = trainer.predict(sentiment_encoded['test'])
 
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 file_out = open("preds_output", "wb")
@@ -1221,6 +1382,8 @@ file_out.close()
 ```
 
 ```{python}
+#| eval: true
+#| echo: false
 
 
 pickle_in = open("preds_output", "rb")
@@ -1230,6 +1393,8 @@ preds_output = pickle.load(pickle_in)
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 preds_output.metrics
@@ -1240,7 +1405,12 @@ Predicting on the test set we see that the loss is 0.144 which is similar to the
 
 ### Classification Report
 
+In order to create our classification report and confusion matrix we will need to create predicted and actual objects.  y_pred is the predictions from our fine-tuned model.  You will notice that it 
+is being created from the preds_output object.  y_true are the actual outcomes from our original data.  You will notice that we are creating the object from the labels of the test set. 
+
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 y_pred = np.argmax(preds_output.predictions, axis = 1)
 
@@ -1251,6 +1421,8 @@ y_true = sentiment_encoded['test'][:]['label']
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 from sklearn.metrics import classification_report
@@ -1261,6 +1433,9 @@ from sklearn.metrics import classification_report
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| eval: false
 
 test_classification_rpt = classification_report(y_true, y_pred)
 
@@ -1268,6 +1443,8 @@ test_classification_rpt = classification_report(y_true, y_pred)
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 file_out = open("test_classification_rpt", "wb")
@@ -1277,6 +1454,8 @@ file_out.close()
 ```
 
 ```{python}
+#| eval: true
+#| echo: false
 
 
 
@@ -1287,6 +1466,8 @@ test_classification_rpt = pickle.load(pickle_in)
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 
@@ -1308,9 +1489,18 @@ Using the classification report we can evaluate the test set metrics by label. T
 
 ### Confusion Matrix
 
+```{python}
+
+
+
+
+```
+
 The confusion matrix is a visual representation of how our model performed on predicting on the test set. It shows how many predictions were correct (True Negatives/Neutrals/Positives,) versus incorrect (False Negatives/Neutrals) when compared to actual outcomes.
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 from sklearn.metrics import confusion_matrix
@@ -1318,6 +1508,8 @@ from sklearn.metrics import confusion_matrix
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 cm=confusion_matrix(y_true, y_pred)
 
@@ -1331,6 +1523,8 @@ plt.xlabel("Predicted")
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 plt.show()
@@ -1387,7 +1581,12 @@ The actual value was negative or positive, but the model predicted a neutral val
 
 Appyling these terms to our confusion matrix we find:
 
-True Negative (TN) = 16,342, meaning our model correctly classified 16,342 negative class data points. True Neutral (TL) = 5,191, meaning our model correctly classified 5,191 neutral class data points. True Positive (TP) = 15,849, meaning our model correctly classified 15,849 positve class data points. False Negative (FN) = 267,72, meaning the model incorrectly classified 267 neutral and 72 positive class data points as belonging to the negative class. False Neutral (FL) = 368,238, meaning the model incorrectly classified 368 negative and 238 positive class data points as belonging to the neutral class.
+True Negative (TN) = 16,342, meaning our model correctly classified 16,342 negative class data points. 
+True Neutral (TL) = 5,191, meaning our model correctly classified 5,191 neutral class data points. 
+True Positive (TP) = 15,849, meaning our model correctly classified 15,849 positve class data points. 
+False Negative (FN) = 267,72, meaning the model incorrectly classified 267 neutral and 72 positive class data points as belonging to the negative class. 
+False Neutral (FL) = 368,238, meaning the model incorrectly classified 368 negative and 238 positive class data points as belonging to the neutral class.
+False Positive (FP) =
 
 We can put these numbers in perspective by using percentages for total predictions for each class.
 
@@ -1404,6 +1603,8 @@ The insight we gain from these results is the model is excellent at predicting p
 Now that we have our pre-trained model fine0tuned we will use it to predict on a new dataset. The data includes New York Times comments from the 2018 year.
 
 ```{python}
+#| eval: false
+#| echo: false
 
 def get_prediction(text):
 
@@ -1421,6 +1622,8 @@ def get_prediction(text):
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 def get_prediction(text):
@@ -1440,7 +1643,12 @@ def get_prediction(text):
 
 ```
 
+The fine-tuned model will be saved which allows us to use it for predicting on future data. 
+
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
+#| eval: false
 
 model.save_pretrained("./results/final_model")
 tokenizer.save_pretrained("./results/final_tokenizer")
@@ -1449,7 +1657,11 @@ tokenizer.save_pretrained("./results/final_tokenizer")
 
 ```
 
+
+
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 new_model = AutoModelForSequenceClassification.from_pretrained("./results/final_model")
@@ -1464,6 +1676,8 @@ new_tokenizer = AutoTokenizer.from_pretrained("./results/final_tokenizer")
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 
@@ -1473,6 +1687,8 @@ file_path = r'C:\Users\fvlau\OneDrive\Documents\nytCommentsFinetuneLLM\\nyt_comm
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 
 nyt_sentiments18=pd.read_csv(file_path)
@@ -1481,6 +1697,8 @@ nyt_sentiments18=pd.read_csv(file_path)
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
 
 file_out = open("nyt_sentiments18", "wb")
 pickle.dump(nyt_sentiments18, file_out)
@@ -1490,6 +1708,8 @@ file_out.close()
 ```
 
 ```{python}
+#| eval: true
+#| echo: false
 
 
 
@@ -1500,6 +1720,8 @@ nyt_sentiments18 = pickle.load(pickle_in)
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 nyt_sentiments18.info()
@@ -1508,6 +1730,8 @@ nyt_sentiments18.info()
 ```
 
 ```{python}
+#| eval: false
+#| echo: true
 
 
 nyt_sentiments18=nyt_sentiments18.dropna()
