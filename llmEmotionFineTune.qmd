@@ -1165,6 +1165,7 @@ trainer = Trainer(model=model, args=training_args,
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
+#| eval: false
 
 trainer.train()
 
@@ -1740,6 +1741,8 @@ nyt_sentiments18=nyt_sentiments18.dropna()
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -1748,6 +1751,8 @@ device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 new_model.to(device)
@@ -1757,6 +1762,8 @@ new_model.to(device)
 We are setting the sci_mode (scientific notation) to false for easier interpretaton of probability output.
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 torch.set_printoptions(sci_mode=False)
@@ -1765,6 +1772,8 @@ torch.set_printoptions(sci_mode=False)
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 
@@ -1801,6 +1810,8 @@ We created a function that will take in a string of text and return the probabil
 For comparison, we will print the text string predicted along with the model output.
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 print(nyt_sentiments18.iloc[50,0])
@@ -1811,6 +1822,8 @@ get_prediction(nyt_sentiments18.iloc[50,0])
 Here the prediction is negative and a high confidence in the prediction with a probability of 0.9999.
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 print(nyt_sentiments18.iloc[100,0])
@@ -1821,6 +1834,8 @@ get_prediction(nyt_sentiments18.iloc[100,0])
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 print(nyt_sentiments18.iloc[200,0])
 get_prediction(nyt_sentiments18.iloc[200,0])
@@ -1831,6 +1846,8 @@ get_prediction(nyt_sentiments18.iloc[200,0])
 The prediction for this comment is negative though the confidence that the models prediction is correct is only 0.4402.
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 print(nyt_sentiments18.iloc[240,0])
@@ -1840,6 +1857,8 @@ get_prediction(nyt_sentiments18.iloc[240,0])
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 print(nyt_sentiments18.iloc[310,0])
 get_prediction(nyt_sentiments18.iloc[310,0])
@@ -1848,6 +1867,8 @@ get_prediction(nyt_sentiments18.iloc[310,0])
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 print(nyt_sentiments18.iloc[410,0])
@@ -1856,6 +1877,8 @@ get_prediction(nyt_sentiments18.iloc[421,0])
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 print(nyt_sentiments18.iloc[510,0])
@@ -1865,6 +1888,8 @@ get_prediction(nyt_sentiments18.iloc[510,0])
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 print(nyt_sentiments18.iloc[540,0])
@@ -1875,6 +1900,8 @@ get_prediction(nyt_sentiments18.iloc[540,0])
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 print(nyt_sentiments18.iloc[588,0])
 get_prediction(nyt_sentiments18.iloc[588,0])
@@ -1883,6 +1910,8 @@ get_prediction(nyt_sentiments18.iloc[588,0])
 ```
 
 ```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
 
 
 print(nyt_sentiments18.iloc[623,0])
