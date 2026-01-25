@@ -64,7 +64,6 @@ from tqdm.auto import tqdm
 
 ```
 
-
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -80,6 +79,8 @@ from datasets import Dataset, DatasetDict
 
 
 ```
+
+We will first check and verify that the gpu is available.
 
 ```{python}
 #| code-fold: true
@@ -225,8 +226,6 @@ print(nyt_sentiments17["newDesk"].value_counts(normalize=True).round(2))
 
 
 ```
-
-
 
 ```{python}
 #| code-fold: true
@@ -398,8 +397,6 @@ nyt_shuffled_small = pickle.load(pickle_in)
 
 ```
 
-
-
 ```{python}
 #| eval: false
 #| echo: false
@@ -438,12 +435,7 @@ nyt_shuffled_medium = pickle.load(pickle_in)
 
 ```
 
-
-
-
 We will use 70% of the comments for the training set, 10% for the validation set, and the remaining %20 for the testing set.
-
-
 
 ```{python}
 #| code-fold: true
@@ -508,6 +500,7 @@ nyt_shuffled_large.info()
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
+#| echo: false
 
 
 
@@ -644,6 +637,7 @@ We must make the format of our data compatible with the transformers from Huggin
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
+#| echo: false
 
 
 
@@ -701,7 +695,7 @@ dataset
 
 ```
 
-The dataset has a dictionary structure where the train, test,validation splits are the names of the keys and the values are features: test, label_name, and label.
+The dataset has a dictionary structure where the train, test,validation splits are the names of the keys and the values are features: text, label_name, and label.
 
 ```{python}
 #| code-fold: true
@@ -813,11 +807,11 @@ print(sentiment_encoded['train'][0]['input_ids'])
 
 ```
 
-The first output is the original text of from the first row of the training split. From the second output we want to focus on the first seventeen characters are which are the tokens assigned to the words from the text column.
+The first output is the original text from the first row of the training split. From the second output we want to focus on the first seventeen characters ,which are the tokens assigned to the words from the text column.
 
 ## Labels
 
-There is one last step needed to prepare our data. As will be seen later when setting up the configuration, the model requires two variables: label2id and id2label. As mentioned when reviewing the initial dataset, we will require a label_name column and label column for creating these variables.
+There is one last step needed to prepare our data. As will be seen later when setting up the configuration, the model requires two variables: label2id and id2label. This was  mentioned when reviewing the initial dataset: the requirement of  a label_name column and label column for creating these variables.
 
 ```{python}
 #| code-fold: true
@@ -831,7 +825,7 @@ dataset['train'][0]
 
 From the output we see the label_name and label columns. We will use list comprehension to create these variables. A list comprehension is a concise way to create a list from another list.
 
-First, label2id will be created The list comprehension will create a dictionary with key/value pairs. Label_name is the key and label is the value. Basically, this is mapping label_name to label.
+First, label2id will be created. The list comprehension will create a dictionary with key/value pairs. Label_name is the key and label is the value. Basically, this is mapping label_name to label.
 
 ```{python}
 #| code-fold: true
@@ -852,8 +846,8 @@ label2id.items()
 ```
 
 ```{python}
-#| code-fold: true
-#| code-summary: "Show Code"
+#| eval: false
+#| echo: false
 
 
 label2id
@@ -862,7 +856,7 @@ label2id
 
 label2id has been successfully created as seen in the output.
 
-Now we will use label2id to create id2label. The difference in using list comprehension in this case is the key/value pairs will be interchanged and the key from label2id becomes values and values become keys. This results in id2label having label as the key and label_name as the values.
+Now we will use label2id to create id2label. The difference in using list comprehension for creating id2label is the key/value pairs will be interchanged and the key from label2id becomes values and values become keys. This results in id2label having label as the key and label_name as the values.
 
 ```{python}
 #| code-fold: true
@@ -883,8 +877,8 @@ id2label.items()
 ```
 
 ```{python}
-#| code-fold: true
-#| code-summary: "Show Code"
+#| eval: false
+#| echo: false
 
 id2label
 
@@ -893,7 +887,7 @@ id2label
 
 ## Model Fine Tuning
 
-We will create a model checkpoint which is simply the chosen Hugging Face pre-trined model.  Creating the model_checkpoint object makes it easier to aplly the model in process steps. 
+We will create a model checkpoint which is simply the chosen  pre-trined Hugging Face model. Creating the model_checkpoint object makes it easier to apply the model in our process steps.
 
 ```{python}
 #| code-fold: true
@@ -967,7 +961,6 @@ model.config.label2id
 
 From the model configuration we see the label2id and id2label variables that we needed to create for the model.
 
-For our model configuration we will assign the model's label2id and id2label attributes to the variables we created.
 
 ```{python}
 #| code-fold: true
@@ -986,7 +979,11 @@ model = AutoModelForSequenceClassification.from_pretrained(model_checkpoint, con
 
 ```
 
-to(device) moves the model to the selected device, the gpu in this case.
+
+The device object is using the gpu if available,  If the gpu is not available then the cpu will be used. 
+
+For our model configuration we will assign the model's label2id and id2label attributes to the variables of the same name we created.
+And finally our model object uses the model_checkpoint and config object we created.  The to(device) moves the model to the selected device, the gpu in this case.
 
 ```{python}
 #| code-fold: true
@@ -1096,6 +1093,21 @@ def compute_metrics(pred):
 
 ```
 
+The function creates the computation of our selected metrics forf use during the model evaluation on our validation set. 
+
+Metric definition:
+
+•	Accuracy-measures the number of predictions that are correct as a percentage of the total number of predictions that are made. As an example, if 90% of your predictions are correct, your accuracy is simply 90%. Calculation: number of correct predictions/Number of total predictions. TP+TN/(TP+TN+FP+FN)
+•	Precision-tells us about the quality of positive predictions. It may not find all the positives but the ones that the model does classify as positive are likely to be correct. As an example, out of everyone predicted to have defaulted, how many of them did default? So, within everything that has been predicted as positive, precision counts the percentage that is correct. Calculation: True positives/All Positives. TP/(TP+FP)
+•	Recall- tells us about how well the model identifies true positives. The model may find a lot of positives, yet it also will incorrectly detect many positives that are not actually positives. Out of all the patients who have the disease, how many were correctly identified? So, within everything that is positive, how many did the model successfully find? A model with low recall is unable to find all (or a large part) of the positive cases in the data. Calculated as: True Positives/ (False Negatives + True Positives)
+•	F1 Score-The F1 score is defined as the harmonic mean of precision and recall. The formula for the F1 score is the following: 2 times(precision*Recall)/ (Precision + Recall)) Since the F1 score is an average of Precision and Recall, it means that the F1 score gives equal weight to Precision and Recall.
+
+
+Rhe definitions are also relevent for our interpreting results of the classification report from the test set.  
+
+
+These metrics 
+
 ```{python}
 #| eval: true
 #| echo: false
@@ -1135,6 +1147,8 @@ training_args = TrainingArguments(
 
 ```
 
+Training Arguments:
+
 ```{python}
 #| eval: false
 #| echo: false
@@ -1145,7 +1159,6 @@ training_args = TrainingArguments(
 ```
 
 ## Trainer
-
 
 ```{python}
 #| code-fold: true
@@ -1406,8 +1419,7 @@ Predicting on the test set we see that the loss is 0.144 which is similar to the
 
 ### Classification Report
 
-In order to create our classification report and confusion matrix we will need to create predicted and actual objects.  y_pred is the predictions from our fine-tuned model.  You will notice that it 
-is being created from the preds_output object.  y_true are the actual outcomes from our original data.  You will notice that we are creating the object from the labels of the test set. 
+In order to create our classification report and confusion matrix we will need to create predicted and actual objects. y_pred is the predictions from our fine-tuned model. You will notice that it is being created from the preds_output object. y_true are the actual outcomes from our original data. You will notice that we are creating the object from the labels of the test set.
 
 ```{python}
 #| code-fold: true
@@ -1453,6 +1465,8 @@ pickle.dump(test_classification_rpt, file_out)
 file_out.close()
 
 ```
+
+
 
 ```{python}
 #| eval: true
@@ -1582,12 +1596,7 @@ The actual value was negative or positive, but the model predicted a neutral val
 
 Appyling these terms to our confusion matrix we find:
 
-True Negative (TN) = 16,342, meaning our model correctly classified 16,342 negative class data points. 
-True Neutral (TL) = 5,191, meaning our model correctly classified 5,191 neutral class data points. 
-True Positive (TP) = 15,849, meaning our model correctly classified 15,849 positve class data points. 
-False Negative (FN) = 267,72, meaning the model incorrectly classified 267 neutral and 72 positive class data points as belonging to the negative class. 
-False Neutral (FL) = 368,238, meaning the model incorrectly classified 368 negative and 238 positive class data points as belonging to the neutral class.
-False Positive (FP) =
+True Negative (TN) = 16,342, meaning our model correctly classified 16,342 negative class data points. True Neutral (TL) = 5,191, meaning our model correctly classified 5,191 neutral class data points. True Positive (TP) = 15,849, meaning our model correctly classified 15,849 positve class data points. False Negative (FN) = 267,72, meaning the model incorrectly classified 267 neutral and 72 positive class data points as belonging to the negative class. False Neutral (FL) = 368,238, meaning the model incorrectly classified 368 negative and 238 positive class data points as belonging to the neutral class. False Positive (FP) =
 
 We can put these numbers in perspective by using percentages for total predictions for each class.
 
@@ -1644,7 +1653,7 @@ def get_prediction(text):
 
 ```
 
-The fine-tuned model will be saved which allows us to use it for predicting on future data. 
+The fine-tuned model will be saved which allows us to use it for predicting on future data.
 
 ```{python}
 #| code-fold: true
@@ -1657,8 +1666,6 @@ tokenizer.save_pretrained("./results/final_tokenizer")
 
 
 ```
-
-
 
 ```{python}
 #| code-fold: true
