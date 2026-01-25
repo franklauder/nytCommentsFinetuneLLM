@@ -11,7 +11,7 @@ format:
 
 # Introduction
 
-Text classification involves assigning predefined categories to text.  For our project we’ll be fine-tuning a pre-trained large language model (llm) from Hugging Face  for use in predicting sentiment on unseen data. Sentiment analysis is where text is labeled based on its emotional tone.The pre-trained model will be fine-tuned on a  dataset of New York Times comments from the 2017 year.  This dataset has already had each comment labeled as negative, neutral, or positive from a previous project.  Once the pre-trained model has been fine-tuned, we will use it to predict sentiment of comments  on a unlabled  New York Times dataset from the 2018 year. Unlabeld mead that there are no sentiments assigned to any of the rows.
+Text classification involves assigning predefined categories to text.  For our project we’ll be fine-tuning a pre-trained large language model (llm) from Hugging Face for use in predicting sentiment on unseen data. Sentiment analysis is where text is labeled based on its emotional tone. The pre-trained model will be fine-tuned on a  dataset of New York Times comments from the 2017 year.  This dataset has already had each comment labeled as negative, neutral, or positive from a previous project.  Once the pre-trained model has been fine-tuned, we will use it to predict sentiment of unlabeld comments from the New York Times 2018 dataset. Unlabeld means that there are no sentiments assigned to any of the rows.
 
 First we’ll review what a pre-trained model is.  A LLM is trained on a broad dataset to learn general patterns.  Basically through this process is where model parameters and weights are learned.  It can be a time consuming process thus fine-tuning  a pre-trained model on specific data to adapt it for specialized tasks saves time.
 
@@ -811,7 +811,7 @@ The first output is the original text from the first row of the training split. 
 
 ## Labels
 
-There is one last step needed to prepare our data. As will be seen later when setting up the configuration, the model requires two variables: label2id and id2label. This was  mentioned when reviewing the initial dataset: the requirement of  a label_name column and label column for creating these variables.
+There is one last step needed to prepare our data. As will be seen later when setting up the configuration, the model requires two variables: label2id and id2label. This was mentioned when reviewing the initial dataset: the requirement of a label_name column and label column for creating these variables.
 
 ```{python}
 #| code-fold: true
@@ -887,7 +887,7 @@ id2label
 
 ## Model Fine Tuning
 
-We will create a model checkpoint which is simply the chosen  pre-trined Hugging Face model. Creating the model_checkpoint object makes it easier to apply the model in our process steps.
+We will create a model checkpoint which is simply the chosen pre-trined Hugging Face model. Creating the model_checkpoint object makes it easier to apply the model in our process steps.
 
 ```{python}
 #| code-fold: true
@@ -961,7 +961,6 @@ model.config.label2id
 
 From the model configuration we see the label2id and id2label variables that we needed to create for the model.
 
-
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -979,11 +978,9 @@ model = AutoModelForSequenceClassification.from_pretrained(model_checkpoint, con
 
 ```
 
+The device object is using the gpu if available, If the gpu is not available then the cpu will be used.
 
-The device object is using the gpu if available,  If the gpu is not available then the cpu will be used. 
-
-For our model configuration we will assign the model's label2id and id2label attributes to the variables of the same name we created.
-And finally our model object uses the model_checkpoint and config object we created.  The to(device) moves the model to the selected device, the gpu in this case.
+For our model configuration we will assign the model's label2id and id2label attributes to the variables of the same name we created. And finally our model object uses the model_checkpoint and config object we created. The to(device) moves the model to the selected device, the gpu in this case.
 
 ```{python}
 #| code-fold: true
@@ -1093,20 +1090,15 @@ def compute_metrics(pred):
 
 ```
 
-The function creates the computation of our selected metrics forf use during the model evaluation on our validation set. 
+The function creates the computation of our selected metrics forf use during the model evaluation on our validation set.
 
 Metric definition:
 
-•	Accuracy-measures the number of predictions that are correct as a percentage of the total number of predictions that are made. As an example, if 90% of your predictions are correct, your accuracy is simply 90%. Calculation: number of correct predictions/Number of total predictions. TP+TN/(TP+TN+FP+FN)
-•	Precision-tells us about the quality of positive predictions. It may not find all the positives but the ones that the model does classify as positive are likely to be correct. As an example, out of everyone predicted to have defaulted, how many of them did default? So, within everything that has been predicted as positive, precision counts the percentage that is correct. Calculation: True positives/All Positives. TP/(TP+FP)
-•	Recall- tells us about how well the model identifies true positives. The model may find a lot of positives, yet it also will incorrectly detect many positives that are not actually positives. Out of all the patients who have the disease, how many were correctly identified? So, within everything that is positive, how many did the model successfully find? A model with low recall is unable to find all (or a large part) of the positive cases in the data. Calculated as: True Positives/ (False Negatives + True Positives)
-•	F1 Score-The F1 score is defined as the harmonic mean of precision and recall. The formula for the F1 score is the following: 2 times(precision*Recall)/ (Precision + Recall)) Since the F1 score is an average of Precision and Recall, it means that the F1 score gives equal weight to Precision and Recall.
+• Accuracy-measures the number of predictions that are correct as a percentage of the total number of predictions that are made. As an example, if 90% of your predictions are correct, your accuracy is simply 90%. Calculation: number of correct predictions/Number of total predictions. TP+TN/(TP+TN+FP+FN) • Precision-tells us about the quality of positive predictions. It may not find all the positives but the ones that the model does classify as positive are likely to be correct. As an example, out of everyone predicted to have defaulted, how many of them did default? So, within everything that has been predicted as positive, precision counts the percentage that is correct. Calculation: True positives/All Positives. TP/(TP+FP) • Recall- tells us about how well the model identifies true positives. The model may find a lot of positives, yet it also will incorrectly detect many positives that are not actually positives. Out of all the patients who have the disease, how many were correctly identified? So, within everything that is positive, how many did the model successfully find? A model with low recall is unable to find all (or a large part) of the positive cases in the data. Calculated as: True Positives/ (False Negatives + True Positives) • F1 Score-The F1 score is defined as the harmonic mean of precision and recall. The formula for the F1 score is the following: 2 times(precision\*Recall)/ (Precision + Recall)) Since the F1 score is an average of Precision and Recall, it means that the F1 score gives equal weight to Precision and Recall.
 
+Rhe definitions are also relevent for our interpreting results of the classification report from the test set.
 
-Rhe definitions are also relevent for our interpreting results of the classification report from the test set.  
-
-
-These metrics 
+These metrics
 
 ```{python}
 #| eval: true
@@ -1148,6 +1140,26 @@ training_args = TrainingArguments(
 ```
 
 Training Arguments:
+
+-   Output_dir: the directory where we will store the results of the model.
+
+-   overwrite_ouput_dir: When set to true, the output directory is overwritten on a new training of the model.
+
+-    eval_strategy: The interval for evaluating the model. For our training we have set it to evaluate after each epoch.
+
+-   save_strategy: How often to save the model. We have set it to after each epoch.
+
+-    learning_rate: controls how quickly the model's parameters move towards the optimal solution (minimizing the loss function)
+
+-   per_device_train_batch: subset of the entire training dataset. It is the number of samples processed before the model is updated. per_device_eval_batch_size: is the number of samples processed before the model is evaluated.
+
+-   weight_decay: used to discourage model from using large weight values during training. Prevents overfitting.
+
+-    logging_dir: directory where the logs are saved.
+
+-   save_steps: Determines how frequently the model's checkpoint is saved during training.
+
+Note-An epoch is a training iteration during which we update the paramters for all our training samples.
 
 ```{python}
 #| eval: false
@@ -1465,8 +1477,6 @@ pickle.dump(test_classification_rpt, file_out)
 file_out.close()
 
 ```
-
-
 
 ```{python}
 #| eval: true
