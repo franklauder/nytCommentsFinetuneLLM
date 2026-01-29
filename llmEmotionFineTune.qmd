@@ -11,9 +11,11 @@ format:
 
 # Introduction
 
-Text classification involves assigning predefined categories to text.  For our project we’ll be fine-tuning a pre-trained large language model (llm) from Hugging Face for use in predicting sentiment on unseen data. Sentiment analysis is where text is labeled based on its emotional tone. The pre-trained model will be fine-tuned on a  dataset of New York Times comments from the 2017 year.  This dataset has already had each comment labeled as negative, neutral, or positive from a previous project.  Once the pre-trained model has been fine-tuned, we will use it to predict sentiment of unlabeld comments from the New York Times 2018 dataset. Unlabeld means that there are no sentiments assigned to any of the rows.
+Sentiment analysis involves assigning predefined categories to text, We use use our understanding of the emotional intent of words to infer whether a section of text is negative, neutral, or positive. For our project we will predict sentiment using a pre-trained large language model (llm) from Hugging Face which we will fine-tune on our specific data. A pre-trained model is a LLM trained on a broad dataset to learn general patterns. Through this process is where model parameters and weights are learned. This can be a time-consuming process thus by using a pre-trained the heavy lifting has been borne by the authors of the model . This makes it easier to update the weights of the model on specific data to adapt it for specialized tasks. For the fine-tuning we will use a New York Times 2017 dataset of comments already including sentiment labels. This was accomplished in a previous project using the AFINN method. The AFINN method is a rule-based approach which has a dictionary of words and each word has an intensity score ranging from -5 to 5. The overall sentiment score of a text is calculated by summing the intensity scores. Fine-tuning of the pre-trained model is different as it is a machine learning process. We train the model on a training subset of our specific data and evaluate it on a testing subset of our specific data. These models differ from rule-based methods as they do not look at words in isolation; they look at the whole sentence, understand word order, context, and sarcasm. Once the fine-tuning of the pre-trained model is finished, we will use it to predict sentiment of unlabeled comments from the New York Times 2018 dataset.
 
-First we’ll review what a pre-trained model is.  A LLM is trained on a broad dataset to learn general patterns.  Basically through this process is where model parameters and weights are learned.  It can be a time consuming process thus fine-tuning  a pre-trained model on specific data to adapt it for specialized tasks saves time.
+We will be using the pre-trained cardiffnlp/twitter-roberta-base-sentiment-latest model. The license can be viewed at the link below.
+
+[cardiffnlp license](https://creativecommons.org/licenses/by/4.0/)
 
 # Data Inspection
 
@@ -802,12 +804,12 @@ print(sentiment_encoded['train'][0]['text'])
 #| code-summary: "Show Code"
 
 
-print(sentiment_encoded['train'][0]['input_ids'])
+print(sentiment_encoded['train'][0]['input_ids'][1:17])
 
 
 ```
 
-The first output is the original text from the first row of the training split. From the second output we want to focus on the first seventeen characters ,which are the tokens assigned to the words from the text column.
+The first output is the original text from the first row of the training split. From the second output we have a list, which are the tokens assigned to the words from the text column.
 
 ## Labels
 
@@ -1145,17 +1147,17 @@ Training Arguments:
 
 -   overwrite_ouput_dir: When set to true, the output directory is overwritten on a new training of the model.
 
--    eval_strategy: The interval for evaluating the model. For our training we have set it to evaluate after each epoch.
+-   eval_strategy: The interval for evaluating the model. For our training we have set it to evaluate after each epoch.
 
 -   save_strategy: How often to save the model. We have set it to after each epoch.
 
--    learning_rate: controls how quickly the model's parameters move towards the optimal solution (minimizing the loss function)
+-   learning_rate: controls how quickly the model's parameters move towards the optimal solution (minimizing the loss function)
 
 -   per_device_train_batch: subset of the entire training dataset. It is the number of samples processed before the model is updated. per_device_eval_batch_size: is the number of samples processed before the model is evaluated.
 
 -   weight_decay: used to discourage model from using large weight values during training. Prevents overfitting.
 
--    logging_dir: directory where the logs are saved.
+-   logging_dir: directory where the logs are saved.
 
 -   save_steps: Determines how frequently the model's checkpoint is saved during training.
 
@@ -1172,6 +1174,8 @@ Note-An epoch is a training iteration during which we update the paramters for a
 
 ## Trainer
 
+Set up the trainer
+
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -1187,6 +1191,8 @@ trainer = Trainer(model=model, args=training_args,
 
 ```
 
+We can now fine tune the model.
+
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -1196,6 +1202,8 @@ trainer.train()
 
 
 ```
+
+A loss function tells us how good our model is at making predictions during training by helping us assess the differences between actual values and those predicted by the model. The lower the loss function the better our model is.
 
 ```{python}
 #| eval: false
