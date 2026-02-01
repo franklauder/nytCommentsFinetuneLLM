@@ -442,6 +442,7 @@ We will use 70% of the comments for the training set, 10% for the validation set
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
+#| eval: false
 
 
 
@@ -639,7 +640,7 @@ We must make the format of our data compatible with the transformers from Huggin
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
-#| echo: false
+#| eval: false
 
 
 
@@ -742,6 +743,7 @@ Apply the function to the dataset
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
+#| eval: false
 
 
 sentiment_encoded = dataset.map(tokenize, batched=True, batch_size=None)
@@ -887,7 +889,7 @@ id2label
 
 ```
 
-## Model Fine Tuning
+# Model Fine Tuning
 
 We will create a model checkpoint which is simply the chosen pre-trined Hugging Face model. Creating the model_checkpoint object makes it easier to apply the model in our process steps.
 
@@ -1135,7 +1137,9 @@ training_args = TrainingArguments(
     logging_dir="./logs",
     logging_first_step=10,
     save_steps=500,
-    disable_tqdm=False
+    disable_tqdm=False,
+    metric_for_best_model='eval_loss',
+    load_best_model_at_end=True
 
 
 )
@@ -1201,7 +1205,7 @@ We can now fine tune the model.
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
-#| eval: false
+
 
 trainer.train()
 
