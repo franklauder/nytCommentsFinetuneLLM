@@ -1398,7 +1398,7 @@ print(f"Evaluation results 20% data sample: {eval_results_large}")
 
 ```
 
-For this round of training we increased the sample to 20% of the data, with 135,750 rows assigned to the training data. The result was a training loss 0.111 and an evaluation loss of 0.146. accuracy, precision, recall, and f1 scores all improved to around 0.96. Increasing the training data to 135,750 rows provided good results as there is only a 0.035 difference between training and evaluation loss so not much over fitting. It should be noted that increasing the sample of data also had an accompanying large increase in evaluation runtime.
+For this round of training we increased the sample to 20% of the data, with 135,750 rows assigned to the training data. The result was a training loss 0.14 and an evaluation loss of 0.18. Evaluation accuracy, precision, recall, and f1 scores all improved to around 0.94. Increasing the training data to 135,750 rows provided good results as there is only a 0.04 difference between training and evaluation loss so not much over fitting. It should be noted that increasing the sample of data also had an accompanying large increase in evaluation runtime.
 
 ## Test Set Metrtics
 
@@ -1518,7 +1518,7 @@ print(test_classification_rpt)
 
 ```
 
-Using the classification report we can evaluate the test set metrics by label. The metrics show what percentage of the predictions were actually true. The model performs very well on predicting negative sentiment (label 0) and positive sentiment (label 2) with scores at 0.97. The model does not perform as well on predicting neutral sentiment (label 1) with scores 0.08 to 0.07 lower than the other labels. These are still good scores; just not at the level of the other labels.
+Using the classification report we can evaluate the test set metrics by label. The metrics show what percentage of the predictions were actually true. The model performs very well on predicting negative sentiment (label 0) and positive sentiment (label 2) with scores ranging from 0.94 to 0.97. The model does not perform as well on predicting neutral sentiment (label 1) with scores ranging from 0.81 to 086.  These are still good scores; just not at the level of the other labels. The model is good at accuratley predicting neutral sentiment, it's just not strong in finding neutral sentiment as seen in the .05 difference between precision and recall scores.
 
 ```{python}
 
@@ -1623,21 +1623,21 @@ The actual value was negative or positive, but the model predicted a neutral val
 
 Appyling these terms to our confusion matrix we find:
 
-True Negative (TN) = 16,342, meaning our model correctly classified 16,342 negative class data points. True Neutral (TL) = 5,191, meaning our model correctly classified 5,191 neutral class data points. True Positive (TP) = 15,849, meaning our model correctly classified 15,849 positve class data points. False Negative (FN) = 267,72, meaning the model incorrectly classified 267 neutral and 72 positive class data points as belonging to the negative class. False Neutral (FL) = 368,238, meaning the model incorrectly classified 368 negative and 238 positive class data points as belonging to the neutral class. False Positive (FP) =
+True Negative (TN) = 16,249, meaning our model correctly classified 16,249 negative class data points. True Neutral (TL) = 4,720, meaning our model correctly classified 4,720 neutral class data points. True Positive (TP) = 15,543, meaning our model correctly classified 15,543 positve class data points. False Negative (FN) = 432, meaning the model incorrectly classified 275 neutral and 157 positive class data points as belonging to the negative class. False Neutral (FL) = 1,077, meaning the model incorrectly classified 685 negative and 392 positive class data points as belonging to the neutral class. False Positive (FP) = 765, meaning the model incorrectly classified 296 negative and 469 neutral class data points as belonging to the negative class.
 
 We can put these numbers in perspective by using percentages for total predictions for each class.
 
-Of the total predictions for the negative class, 98% were correctly predicted as the negative class, 2% were incorrectly predicted as the neutral class and less than 1% were incorrectly predicted as the positive class.
+Of the total predictions for the negative class, 97.4% were correctly predicted as the negative class, 1.7% were incorrectly predicted as the neutral class and less than 1% were incorrectly predicted as the positive class.
 
-Of the total predictions for the neutral class, 89% were correctly predicted as the neutral class, 6% were incorrectly predicted as the negative class, and 4% were incorrectly predicted as the positive class.
+Of the total predictions for the neutral class, 81.4% were correctly predicted as the neutral class, 11.8% were incorrectly predicted as the negative class, and 6.8% were incorrectly predicted as the positive class.
 
-Of the total predictions for the positive class, 97% were correctly predicted as the positive class, less than 1% were incorrectly predicted as the negative class, and 2% were incorrectly predicted as the neutral class.
+Of the total predictions for the positive class, 95.3% were correctly predicted as the positive class,  1.8% were incorrectly predicted as the negative class, and 2.9% were incorrectly predicted as the neutral class.
 
 The insight we gain from these results is the model is excellent at predicting positive and negative sentiment. The model is not as strong at predicting the neutral class though the results are still considered good.
 
 # Predicting on unlabeled data
 
-Now that we have our pre-trained model fine0tuned we will use it to predict on a new dataset. The data includes New York Times comments from the 2018 year.
+Now that we have our pre-trained model fine tuned we will use it to predict on a new dataset. The data includes New York Times comments from the 2018 year.
 
 ```{python}
 #| eval: false
@@ -1877,7 +1877,7 @@ get_prediction(nyt_sentiments18.iloc[200,0])
 
 ```
 
-The prediction for this comment is negative though the confidence that the models prediction is correct is only 0.4402.
+The prediction for this comment is positive though the confidence in  the models prediction  is only 0.72.
 
 ```{python}
 #| code-fold: true
@@ -1889,6 +1889,8 @@ get_prediction(nyt_sentiments18.iloc[240,0])
 
 
 ```
+
+The prediction for this comment is neutral though the confidence in  the models prediction  is only 0.63
 
 ```{python}
 #| code-fold: true
@@ -1954,8 +1956,8 @@ get_prediction(nyt_sentiments18.iloc[623,0])
 
 ```
 
-Most of selection of comments have high confidence of correctly predicted.
+From a our randomly selected  sample of comments we find mostly high confidence in the models predictions. 
 
-# Final
+# Using fine-tuned model
 
-Our fine-tuned model can be used in a number of ways. We can build a streamlit application with our model which will allow users to have a user interface to upload text for sentiment prediction. Our model can also be used as part of an AI Agent.
+Our fine-tuned model can be used in a number of ways. We can build an application with our model on a platform such as Streamlit, which will allow users to have a user interface to upload text for sentiment prediction. Our model can also be used as part of an AI Agent.
