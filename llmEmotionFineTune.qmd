@@ -446,7 +446,7 @@ We will use 70% of the comments for the training set, 10% for the validation set
 
 
 
-nyt_shuffled_large = nyt_sentiments17_2.sample(frac=0.2, random_state=42).reset_index(drop=True)
+nyt_shuffled_large = nyt_sentiments17_2.sample(frac=0.25, random_state=42).reset_index(drop=True)
 
 
 ```
@@ -1132,7 +1132,7 @@ training_args = TrainingArguments(
     learning_rate=2e-5,
     per_device_train_batch_size=16,
     per_device_eval_batch_size=16,
-    num_train_epochs=3,
+    num_train_epochs=2,
     weight_decay=0.01,
     logging_dir="./logs",
     logging_first_step=10,
@@ -1213,6 +1213,10 @@ trainer.train()
 ```
 
 A loss function tells us how good our model is at making predictions during training by helping us assess the differences between actual values and those predicted by the model. The lower the loss function the better our model is.
+
+
+After 2nd epoch eval loss 0.15 and training loss0.156.  after 3rd epock eval loss 0.1646 and training loss .129/0.22
+
 
 ```{python}
 #| eval: false
