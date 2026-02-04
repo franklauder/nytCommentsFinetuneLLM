@@ -208,8 +208,8 @@ nyt_sentiments17["sentiment"].value_counts(normalize=True).round(2).plot(kind='b
 The percentage breakdown of sentiment is negative 43%, positive 42%, and neutral 15%. We will need to keep these percentages during the sampling of the data and splitting it into train, test, and validation sets.
 
 ```{python}
-#| code-fold: true
-#| code-summary: "Show Code"
+#| eval: false
+#| echo: false
 
 
 print(nyt_sentiments17["typeOfMaterial"].value_counts(normalize=True).round(2))
@@ -218,8 +218,8 @@ print(nyt_sentiments17["typeOfMaterial"].value_counts(normalize=True).round(2))
 ```
 
 ```{python}
-#| code-fold: true
-#| code-summary: "Show Code"
+#| eval: false
+#| echo: false
 
 
 
@@ -230,8 +230,8 @@ print(nyt_sentiments17["newDesk"].value_counts(normalize=True).round(2))
 ```
 
 ```{python}
-#| code-fold: true
-#| code-summary: "Show Code"
+#| echo: false
+#| eval: false
 
 
 
@@ -1203,8 +1203,8 @@ trainer = Trainer(model=model, args=training_args,
 We can now fine tune the model.
 
 ```{python}
-#| code-fold: true
-#| code-summary: "Show Code"
+#| eval: false
+#| echo: false
 
 
 trainer.train()
@@ -1358,6 +1358,16 @@ print(f"Evaluation results 11% data sample: {eval_results_medium}")
 
 The sample was increased to 11% of the data. The training set is now 106,662 rows. The additional data had a positive impact on the model as training loss dropped to 0.167 and evaluation loss decreased to .024. Accuracy, precision, recall, and f1 scores all increased to around 0.92. These results moved in the right direction though we would like to close the distance between training loss and evaluation loss.
 
+
+```{python}
+
+
+trainer.train()
+
+
+
+```
+
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -1402,7 +1412,7 @@ print(f"Evaluation results 20% data sample: {eval_results_large}")
 
 ```
 
-For this round of training we increased the sample to 20% of the data, with 135,750 rows assigned to the training data. The result was a training loss 0.14 and an evaluation loss of 0.18. Evaluation accuracy, precision, recall, and f1 scores all improved to around 0.94. Increasing the training data to 135,750 rows provided good results as there is only a 0.04 difference between training and evaluation loss so not much over fitting. It should be noted that increasing the sample of data also had an accompanying large increase in evaluation runtime.
+For this round of training we increased the sample to 20% of the data, with 135,750 rows assigned to the training data. The result was a training loss 0.1531 and an evaluation loss of 0.1756. Evaluation accuracy, precision, recall, and f1 scores all improved to around 0.95. Increasing the training data to 135,750 rows provided good results as there is only a 0.022 difference between training and evaluation loss so not much over fitting. It should be noted that increasing the sample of data also had an accompanying large increase in evaluation runtime.
 
 ## Test Set Metrtics
 
@@ -1448,7 +1458,7 @@ preds_output.metrics
 
 ```
 
-Predicting on the test set we see that the loss along with the other metrics is similar to the evaluation results. This means our model is generalizing well to unseen data.
+Predicting on the test set we see that the loss was slightly lower at 0.1725. The other metrics are similar to the evaluation results at around 0.95. This means our model is generalizing well to unseen data.
 
 ### Classification Report
 
@@ -1852,7 +1862,9 @@ For comparison, we will print the text string predicted along with the model out
 #| code-summary: "Show Code"
 
 
-print(nyt_sentiments18.iloc[50,0])
+print("Comment:",nyt_sentiments18.iloc[50,0])
+print("Type of Material:",nyt_sentiments18.iloc[50,4])
+print("News Desk:",nyt_sentiments18.iloc[50,3])
 get_prediction(nyt_sentiments18.iloc[50,0])
 
 ```
@@ -1864,7 +1876,9 @@ Here the prediction is negative and a high confidence in the prediction with a p
 #| code-summary: "Show Code"
 
 
-print(nyt_sentiments18.iloc[100,0])
+print("Comment:",nyt_sentiments18.iloc[100,0])
+print("Type of Material:",nyt_sentiments18.iloc[100,4])
+print("News Desk:",nyt_sentiments18.iloc[100,3])
 get_prediction(nyt_sentiments18.iloc[100,0])
 
 
@@ -1875,7 +1889,9 @@ get_prediction(nyt_sentiments18.iloc[100,0])
 #| code-fold: true
 #| code-summary: "Show Code"
 
-print(nyt_sentiments18.iloc[200,0])
+print("Comment:",nyt_sentiments18.iloc[200,0])
+print("Type of Material:",nyt_sentiments18.iloc[200,4])
+print("News Desk:",nyt_sentiments18.iloc[200,3])
 get_prediction(nyt_sentiments18.iloc[200,0])
 
 
@@ -1888,7 +1904,9 @@ The prediction for this comment is positive though the confidence in  the models
 #| code-summary: "Show Code"
 
 
-print(nyt_sentiments18.iloc[240,0])
+print("Comment:",nyt_sentiments18.iloc[240,0])
+print("Type of Material:",nyt_sentiments18.iloc[240,4])
+print("News Desk:",nyt_sentiments18.iloc[240,3])
 get_prediction(nyt_sentiments18.iloc[240,0])
 
 
@@ -1900,7 +1918,9 @@ The prediction for this comment is neutral though the confidence in  the models 
 #| code-fold: true
 #| code-summary: "Show Code"
 
-print(nyt_sentiments18.iloc[310,0])
+print("Comment:",nyt_sentiments18.iloc[310,0])
+print("Type of Material:",nyt_sentiments18.iloc[310,4])
+print("News Desk:",nyt_sentiments18.iloc[310,3])
 get_prediction(nyt_sentiments18.iloc[310,0])
 
 
@@ -1911,7 +1931,9 @@ get_prediction(nyt_sentiments18.iloc[310,0])
 #| code-summary: "Show Code"
 
 
-print(nyt_sentiments18.iloc[410,0])
+print("Comment:",nyt_sentiments18.iloc[410,0])
+print("Type of Material:",nyt_sentiments18.iloc[100,4])
+print("News Desk:",nyt_sentiments18.iloc[410,3])
 get_prediction(nyt_sentiments18.iloc[421,0])
 
 ```
@@ -1921,7 +1943,9 @@ get_prediction(nyt_sentiments18.iloc[421,0])
 #| code-summary: "Show Code"
 
 
-print(nyt_sentiments18.iloc[510,0])
+print("Comment:",nyt_sentiments18.iloc[510,0])
+print("Type of Material:",nyt_sentiments18.iloc[510,4])
+print("News Desk:",nyt_sentiments18.iloc[510,3])
 get_prediction(nyt_sentiments18.iloc[510,0])
 
 
@@ -1932,7 +1956,9 @@ get_prediction(nyt_sentiments18.iloc[510,0])
 #| code-summary: "Show Code"
 
 
-print(nyt_sentiments18.iloc[540,0])
+print("Comment:",nyt_sentiments18.iloc[540,0])
+print("Type of Material:",nyt_sentiments18.iloc[540,4])
+print("News Desk:",nyt_sentiments18.iloc[540,3])
 get_prediction(nyt_sentiments18.iloc[540,0])
 
 
@@ -1943,7 +1969,9 @@ get_prediction(nyt_sentiments18.iloc[540,0])
 #| code-fold: true
 #| code-summary: "Show Code"
 
-print(nyt_sentiments18.iloc[588,0])
+print("Comment:",nyt_sentiments18.iloc[588,0])
+print("Type of Material:",nyt_sentiments18.iloc[588,4])
+print("News Desk:",nyt_sentiments18.iloc[588,3])
 get_prediction(nyt_sentiments18.iloc[588,0])
 
 
@@ -1954,8 +1982,156 @@ get_prediction(nyt_sentiments18.iloc[588,0])
 #| code-summary: "Show Code"
 
 
-print(nyt_sentiments18.iloc[623,0])
+print("Comment:",nyt_sentiments18.iloc[623,0])
+print("Type of Material:",nyt_sentiments18.iloc[623,4])
+print("News Desk:",nyt_sentiments18.iloc[623,3])
 get_prediction(nyt_sentiments18.iloc[623,0])
+
+
+```
+
+```{python}
+
+
+
+print("Comment:",nyt_sentiments18.iloc[10000,0])
+print("Type of Material:",nyt_sentiments18.iloc[10000,4])
+print("News Desk:",nyt_sentiments18.iloc[10000,3])
+get_prediction(nyt_sentiments18.iloc[10000,0])
+
+
+
+```
+
+
+```{python}
+
+
+print("Comment:",nyt_sentiments18.iloc[30000,0])
+print("Type of Material:",nyt_sentiments18.iloc[30000,4])
+print("News Desk:",nyt_sentiments18.iloc[30000,3])
+get_prediction(nyt_sentiments18.iloc[30000,0])
+
+
+
+
+```
+
+```{python}
+
+
+print("Comment:",nyt_sentiments18.iloc[40000,0])
+print("Type of Material:",nyt_sentiments18.iloc[40000,4])
+print("News Desk:",nyt_sentiments18.iloc[40000,3])
+get_prediction(nyt_sentiments18.iloc[40000,0])
+
+
+
+```
+
+
+
+```{python}
+
+
+print("Comment:",nyt_sentiments18.iloc[60000,0])
+print("Type of Material:",nyt_sentiments18.iloc[60000,4])
+print("News Desk:",nyt_sentiments18.iloc[60000,3])
+get_prediction(nyt_sentiments18.iloc[60000,0])
+
+
+
+
+```
+
+```{python}
+
+
+
+print("Comment:",nyt_sentiments18.iloc[110000,0])
+print("Type of Material:",nyt_sentiments18.iloc[110000,4])
+print("News Desk:",nyt_sentiments18.iloc[110000,3])
+get_prediction(nyt_sentiments18.iloc[110000,0])
+
+
+
+
+```
+
+```{python}
+
+
+
+print("Comment:",nyt_sentiments18.iloc[280000,0])
+print("Type of Material:",nyt_sentiments18.iloc[280000,4])
+print("News Desk:",nyt_sentiments18.iloc[280000,3])
+get_prediction(nyt_sentiments18.iloc[280000,0])
+
+
+
+
+```
+
+
+```{python}
+
+
+
+
+print("Comment:",nyt_sentiments18.iloc[390000,0])
+print("Type of Material:",nyt_sentiments18.iloc[390000,4])
+print("News Desk:",nyt_sentiments18.iloc[390000,3])
+get_prediction(nyt_sentiments18.iloc[390000,0])
+
+
+
+```
+
+```{python}
+
+
+
+
+print("Comment:",nyt_sentiments18.iloc[500000,0])
+print("Type of Material:",nyt_sentiments18.iloc[500000,4])
+print("News Desk:",nyt_sentiments18.iloc[500000,3])
+get_prediction(nyt_sentiments18.iloc[500000,0])
+
+```
+
+```{python}
+
+
+print("Comment:",nyt_sentiments18.iloc[580000,0])
+print("Type of Material:",nyt_sentiments18.iloc[580000,4])
+print("News Desk:",nyt_sentiments18.iloc[580000,3])
+get_prediction(nyt_sentiments18.iloc[580000,0])
+
+
+
+```
+
+
+```{python}
+
+
+
+print("Comment:",nyt_sentiments18.iloc[750000,0])
+print("Type of Material:",nyt_sentiments18.iloc[750000,4])
+print("News Desk:",nyt_sentiments18.iloc[750000,3])
+get_prediction(nyt_sentiments18.iloc[750000,0])
+
+
+```
+
+```{python}
+
+
+
+print("Comment:",nyt_sentiments18.iloc[800000,0])
+print("Type of Material:",nyt_sentiments18.iloc[800000,4])
+print("News Desk:",nyt_sentiments18.iloc[800000,3])
+get_prediction(nyt_sentiments18.iloc[800000,0])
 
 
 ```
