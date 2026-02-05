@@ -60,6 +60,7 @@ import evaluate
 ```{python}
 #| eval: true
 #| echo: false
+#| include: false
 
 from tqdm.auto import tqdm
 
@@ -95,6 +96,16 @@ torch.cuda.is_available()
 ```
 
 The 'True' output means the gpu is available.
+
+# Data Review
+
+```{python}
+
+
+
+```
+
+
 
 ```{python}
 #| eval: false
@@ -143,6 +154,21 @@ nyt_sentiments17 = pickle.load(pickle_in)
 
 ```
 
+
+```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
+
+
+
+print(nyt_sentiments17.shape)
+
+
+
+```
+
+The dataset has just under 970,000 rows and 8 columns. 
+
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -155,6 +181,8 @@ nyt_sentiments17.info()
 
 ```
 
+
+
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -164,18 +192,21 @@ print(nyt_sentiments17.head(2))
 
 ```
 
-We used the .info() method to display the column names and the .head() method to display the first two rows. It is important to note that when configuring the pre-trained model, we will need the sentiment column, which is the label name, and the label column which is the numerical representation of the sentiment column. For the pre-trained model we have selected, if both columns are not the dataset, training the model will result in an error. In the pre-processing steps we will see why.
+We used the .info() method to display the column names.  It is important to note that when configuring the pre-trained model, we will need the sentiment column, which is the label name, and the label column which is the numerical representation of the sentiment column. For the pre-trained model we have selected, if both columns are not present in the dataset, training the model will result in an error. In the pre-processing steps we will see why.
 
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
 
 
-print(nyt_sentiments17.shape)
 
+
+print(nyt_sentiments17.iloc[:,6:8].head(2))
 
 
 ```
+
+
 
 ```{python}
 #| code-fold: true
@@ -187,13 +218,12 @@ print(nyt_sentiments17["sentiment"].value_counts())
 ```
 
 ```{python}
-#| code-fold: true
-#| code-summary: "Show Code"
 
-print(nyt_sentiments17["sentiment"].value_counts(normalize=True).round(2))
 
 
 ```
+
+
 
 ```{python}
 #| code-fold: true
@@ -344,20 +374,12 @@ nyt_sentiments17_2 = pickle.load(pickle_in)
 
 
 
-nyt_sentiments17_2['label'].value_counts(normalize=True).round(2)
+nyt_sentiments17_2[['label','label_name']].value_counts(normalize=True).round(2)
 
 
 ```
 
-```{python}
-#| code-fold: true
-#| code-summary: "Show Code"
 
-
-nyt_sentiments17_2['label_name'].value_counts(normalize=True).round(2)
-
-
-```
 
 Our dataset's sentiment labels now match the pre-trained model.
 
