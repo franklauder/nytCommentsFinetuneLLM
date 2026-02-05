@@ -385,7 +385,7 @@ Our dataset's sentiment labels now match the pre-trained model.
 
 ## Train Test Validation split
 
-Our dataset will be split into training, validation, and testing sets. Before we initiate the split we will shuffle our data.
+Our dataset will be split into training, validation, and testing sets. Before we initiate the split we will sample and shuffle our data.
 
 ```{python}
 #| eval: false
@@ -459,7 +459,7 @@ nyt_shuffled_medium = pickle.load(pickle_in)
 
 ```
 
-We will use 70% of the comments for the training set, 10% for the validation set, and the remaining %20 for the testing set.
+ 
 
 ```{python}
 #| code-fold: true
@@ -521,6 +521,32 @@ nyt_shuffled_large.info()
 
 
 ```
+
+
+```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
+
+
+
+nyt_shuffled_large[['label', 'label_name']].value_counts(normalize=True).round(2)
+
+
+```
+
+The sampled data has 242,413 rows.  The sentiment percentage distribution is consistant with the original dataset. 
+
+
+```{python}
+
+
+
+
+
+```
+
+
+70% of the comments will be used for the training set, 10% for the validation set, and the remaining %20 for the testing set.
 
 ```{python}
 #| code-fold: true
