@@ -683,7 +683,7 @@ validation['label_name'].value_counts(normalize=True).round(2)
 
 ## Dataset
 
-We must make the format of our data compatible with the transformers from Hugging Face, This can be done by using the DatasetDict function which creates a dictionary-like container. We will use it to hold our train, test, and validation splits.
+ The format of our data must be compatible with the transformers from Hugging Face, This can be done by using the DatasetDict function which creates a dictionary-like container. We will use it to hold our train, test, and validation splits.
 
 ```{python}
 #| code-fold: true
@@ -737,6 +737,8 @@ type(dataset)
 
 ```
 
+
+
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -746,7 +748,7 @@ dataset
 
 ```
 
-The dataset has a dictionary structure where the train, test,validation splits are the names of the keys and the values are features: text, label_name, and label.
+The dataset has a dictionary structure in wich  the train, test,validation splits are the names of the keys and the values are features: text, label_name, and label.
 
 ```{python}
 #| code-fold: true
@@ -773,6 +775,17 @@ tokenizer = AutoTokenizer.from_pretrained("cardiffnlp/twitter-roberta-base-senti
 
 ```
 
+
+We will create a function that will will transform the text in the dataset to tokens. 
+
+batch['text'] - all individual comments are grouped together for simultaneous processing by the tokenizer. 
+
+padding=max-length - shoter sequences, each row of comments, will be padded up to the maximum length set by the mdoel. 
+
+truncation=True - text sequences, each row of comments, that exceed the maximum length (input length) allowed by the model will be shortened. 
+
+truncation
+
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -786,7 +799,14 @@ def tokenize(batch):
 
 ```
 
-Apply the function to the dataset
+
+
+
+
+
+Using the .map method we will apply the tokenize function to the dataset.
+
+
 
 ```{python}
 #| code-fold: true
@@ -836,6 +856,136 @@ sentiment_encoded
 ```
 
 There are now two new columns in data dictionary: input_ids and attention_mask.
+
+attention_mask are binary values (0s and 1s) used to tell the model which tokens in a sequence should be processed and which should be ignored.
+
+1: The token is a real token and should be attended to.
+0: The token is a padding token and should be ignored. 
+
+Recall that our tokenizer function padded sequences (comments) so their lengths equaled the maximum length set by the model.  We'll use an example to show how this is displayed. 
+
+
+
+
+```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
+
+
+sentence_1="what is an attention mask"
+sentence_2="what is padding"
+
+
+```
+
+```{python}
+#| code-fold: true
+#| code-summary: "SHow Code"
+
+
+print(f"Sensentence 1:\n{sentence_1}")
+
+
+```
+
+
+```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
+
+
+
+
+print(f"Sensentence 2:\n{sentence_2}")
+
+
+```
+
+```{python}
+#| code-fold: true
+#| code-summary: "SHow Code"
+
+
+
+sentence_1_words=sentence_1.split()
+sentence_1_word_count=len(sentence_1_words)
+
+```
+
+```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
+
+sentence_2_words=sentence_2.split()
+sentence_2_word_count=len(sentence_2_words)
+
+
+
+
+```
+
+
+
+Two sentences of different lengths. 
+
+```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
+
+print(f"Word count sentence 1: {sentence_1_word_count}, word count sentence 2: {sentence_2_word_count}")
+
+
+```
+
+```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
+
+text_tokenized=tokenizer([sentence_1, sentence_2], padding=True, return_tensors="pt")
+
+
+
+```
+
+```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
+
+print("Tokenized sentences attention mask:",format(text_tokenized['attention_mask']))
+
+
+```
+
+
+
+
+From the output it can be seen that the second list represents the shorter sentence.  The 0s tell the model to ignore the padding, ensuring it only considers  "what", "is", "padding".
+
+
+
+
+
+```{python}
+#| code-fold: true
+#| code-summary: "SHow Code"
+
+
+print("Attention mask first row of training data:\n",sentiment_encoded['train'][1]['attention_mask'])
+
+
+```
+
+We observe how the attention mask looks like from one row of the training data. 
+
+```{python}
+
+
+
+
+
+```
+
+input_ids are the tokenized text.
 
 Let's compare a row of the text column and the new input_ids columns.
 
