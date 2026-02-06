@@ -849,13 +849,13 @@ sentiment_encoded = pickle.load(pickle_in)
 #| code-summary: "Show Code"
 
 
-sentiment_encoded
+print("sentiment_encoded structure: \n",sentiment_encoded)
 
 
 
 ```
 
-There are now two new columns in data dictionary: input_ids and attention_mask.
+There are now two new columns in sentiment_encoded data dictionary: input_ids and attention_mask.
 
 attention_mask are binary values (0s and 1s) used to tell the model which tokens in a sequence should be processed and which should be ignored.
 
@@ -902,8 +902,8 @@ print(f"Sensentence 2:\n{sentence_2}")
 ```
 
 ```{python}
-#| code-fold: true
-#| code-summary: "SHow Code"
+#| eval: false
+#| echo: false
 
 
 
@@ -913,8 +913,8 @@ sentence_1_word_count=len(sentence_1_words)
 ```
 
 ```{python}
-#| code-fold: true
-#| code-summary: "Show Code"
+#| eval: false
+#| echo: false
 
 sentence_2_words=sentence_2.split()
 sentence_2_word_count=len(sentence_2_words)
@@ -924,13 +924,11 @@ sentence_2_word_count=len(sentence_2_words)
 
 ```
 
-
-
 Two sentences of different lengths. 
 
 ```{python}
-#| code-fold: true
-#| code-summary: "Show Code"
+#| eval: false
+#| echo: false
 
 print(f"Word count sentence 1: {sentence_1_word_count}, word count sentence 2: {sentence_2_word_count}")
 
@@ -951,7 +949,7 @@ text_tokenized=tokenizer([sentence_1, sentence_2], padding=True, return_tensors=
 #| code-fold: true
 #| code-summary: "Show Code"
 
-print("Tokenized sentences attention mask:",format(text_tokenized['attention_mask']))
+print("Tokenized sentences attention mask: \n",format(text_tokenized['attention_mask']))
 
 
 ```
@@ -970,12 +968,12 @@ From the output it can be seen that the second list represents the shorter sente
 #| code-summary: "SHow Code"
 
 
-print("Attention mask first row of training data:\n",sentiment_encoded['train'][1]['attention_mask'])
+print("Attention mask first row of training data: \n\n",sentiment_encoded['train'][1]['attention_mask'])
 
 
 ```
 
-We observe how the attention mask looks like from one row of the training data. 
+We observe how the attention mask output looks like from one row of training data. 
 
 ```{python}
 
@@ -994,7 +992,7 @@ Let's compare a row of the text column and the new input_ids columns.
 #| code-summary: "Show Code"
 
 
-print(sentiment_encoded['train'][0]['text'])
+print("First row of text from train: \n\n",sentiment_encoded['train'][0]['text'])
 
 
 ```
@@ -1004,7 +1002,7 @@ print(sentiment_encoded['train'][0]['text'])
 #| code-summary: "Show Code"
 
 
-print(sentiment_encoded['train'][0]['input_ids'][1:17])
+print("First row of input_ids from train: \n\n",sentiment_encoded['train'][0]['input_ids'][1:17])
 
 
 ```
@@ -1021,7 +1019,7 @@ There is one last step needed to prepare our data. As will be seen later when se
 
 
 
-dataset['train'][0]
+print("First row of train features: \n\n",dataset['train'][0])
 
 ```
 
@@ -1043,7 +1041,7 @@ label2id = {x['label_name']:x['label'] for x in dataset['train']}
 #| code-summary: "Show Code"
 
 
-label2id.items()
+print("label2id dictionary: \n",label2id.items())
 
 ```
 
@@ -1073,7 +1071,7 @@ id2label = {v:k for  k,v in label2id.items()}
 #| code-fold: true
 #| code-summary: "Show Code"
 
-id2label.items()
+print("id2label dictionary: \n",id2label.items())
 
 
 ```
@@ -1195,8 +1193,8 @@ device
 The output shows the device is 'cuda' meaning it is on our gpu.
 
 ```{python}
-#| code-fold: true
-#| code-summary: "Show Code"
+#| eval: false
+#| echo: false
 
 
 model
@@ -1211,7 +1209,7 @@ model
 #| code-summary: "Show Code"
 
 
-model.config
+print("Model configuration: \n\n",model.config)
 
 
 ```
@@ -1222,7 +1220,7 @@ id2label
 #| code-fold: true
 #| code-summary: "Show Code"
 
-model.config.id2label
+print("Model id2label configuration: \n",model.config.id2label)
 
 ```
 
@@ -1232,7 +1230,7 @@ label2id
 #| code-fold: true
 #| code-summary: "Show Code"
 
-model.config.label2id
+print("Model label2id configuation: \n",model.config.label2id)
 
 
 ```
@@ -1297,11 +1295,27 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 
 ```
 
+
+
+ 
+
+
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
 
 def compute_metrics(pred):
+    """
+        Calculates evaluation metrics.
+
+        Args:
+            pred: predictions from model.
+
+        Returns:
+                accuracy,precision, recall, f1 scores.
+
+    """
+
     labels = pred.label_ids
     preds = pred.predictions.argmax(-1)
 
@@ -1380,7 +1394,7 @@ Training Arguments:
 
 -   save_strategy: How often to save the model. We have set it to after each epoch.
 
--   learning_rate: controls how quickly the model's parameters move towards the optimal solution (minimizing the loss function)
+-   learning_rate: controls how quickly the model's parameters move towards the optimal solution (minimizing the loss function**)
 
 -   per_device_train_batch: subset of the entire training dataset. It is the number of samples processed before the model is updated. per_device_eval_batch_size: is the number of samples processed before the model is evaluated.
 
@@ -1390,7 +1404,9 @@ Training Arguments:
 
 -   save_steps: Determines how frequently the model's checkpoint is saved during training.
 
-*An epoch is a training iteration during which we update the paramters for all our training samples.
+*An epoch is the number of times that the model will work through the entire training set.  This is also known as iteration. In each epoch, the training code updates the weights of the model iteration during which we update the paramters for all our training samples. Updating model weights aims to lower the risk of errors from the model predictions and improve accuracy. 
+
+
 
 ```{python}
 #| eval: false
@@ -1436,7 +1452,7 @@ trainer.train()
 
 ```
 
-A loss function tells us how good our model is at making predictions during training by helping us assess the differences between actual values and those predicted by the model. The lower the loss function the better our model is.
+A loss function tells us how good or bad our model is at making predictions during training by helping us assess the differences between actual values and those predicted by the model. The lower the loss function the better our model is at making predictions.
 
 
 After 2nd epoch eval loss 0.15 and training loss0.156.  after 3rd epock eval loss 0.1646 and training loss .129/0.22
