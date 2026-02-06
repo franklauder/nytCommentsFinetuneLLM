@@ -732,7 +732,7 @@ dataset = pickle.load(pickle_in)
 
 
 
-type(dataset)
+print("dataset is of type: ",type(dataset))
 
 
 ```
@@ -744,17 +744,17 @@ type(dataset)
 #| code-summary: "Show Code"
 
 
-dataset
+print("dataset structure: \n",dataset)
 
 ```
 
-The dataset has a dictionary structure in wich  the train, test,validation splits are the names of the keys and the values are features: text, label_name, and label.
+The dataset has a dictionary structure in which  the train, test,validation splits are the names of the keys and the values are features: text, label_name, and label.
 
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
 
-print(dataset['train'][0])
+print("Train/Dataset first row: \n",dataset['train'][0])
 
 
 ```
