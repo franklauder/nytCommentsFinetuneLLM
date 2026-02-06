@@ -161,7 +161,7 @@ nyt_sentiments17 = pickle.load(pickle_in)
 
 
 
-print(nyt_sentiments17.shape)
+print("nyt_sentiment_17 dataset shape: \n",nyt_sentiments17.shape)
 
 
 
@@ -175,7 +175,7 @@ The dataset has just under 970,000 rows and 8 columns.
 
 
 
-nyt_sentiments17.info()
+print("nyt_sentiment17 dataset structure: \n\n",nyt_sentiments17.info())
 
 
 
@@ -184,8 +184,8 @@ nyt_sentiments17.info()
 
 
 ```{python}
-#| code-fold: true
-#| code-summary: "Show Code"
+#| eval: false
+#| echo: false
 
 
 print(nyt_sentiments17.head(2))
@@ -201,7 +201,7 @@ We used the .info() method to display the column names.  It is important to note
 
 
 
-print(nyt_sentiments17.iloc[:,6:8].head(2))
+print("Sentiment and label columns: \n\n",nyt_sentiments17.iloc[:,6:8].head(2))
 
 
 ```
@@ -212,7 +212,7 @@ print(nyt_sentiments17.iloc[:,6:8].head(2))
 #| code-fold: true
 #| code-summary: "Show Code"
 
-print(nyt_sentiments17["sentiment"].value_counts())
+print("Sentiment value counts: \n\n",nyt_sentiments17["sentiment"].value_counts())
 
 
 ```
@@ -276,8 +276,8 @@ print(nyt_sentiments17["newDesk"].value_counts(normalize=True).round(2))
 ## Features
 
 ```{python}
-#| code-fold: true
-#| code-summary: "Show Code"
+#| eval: true
+#| echo: false
 
 
 nyt_sentiments17_2 = nyt_sentiments17.copy()
@@ -289,7 +289,7 @@ nyt_sentiments17_2 = nyt_sentiments17.copy()
 #| code-fold: true
 #| code-summary: "Show Code"
 
-nyt_sentiments17_2.info()
+print("nyt_sentiments17_2 dataset structure: \n\n",nyt_sentiments17_2.info())
 
 
 ```
@@ -316,10 +316,10 @@ nyt_sentiments17_2 = nyt_sentiments17_2.rename(columns={"clean_comments":"text",
 ```
 
 ```{python}
-#| code-fold: true
-#| code-summary: "Show Code"
+#| eval: false
+#| echo: false
 
-nyt_sentiments17_2.info()
+print("nyt_sentiments17_2 structure with renamed columns: \n\n",nyt_sentiments17_2.info())
 
 
 
@@ -340,7 +340,7 @@ nyt_sentiments17_2=nyt_sentiments17_2.drop(columns=['commentBody','commentID', '
 #| code-fold: true
 #| code-summary: "Show Code"
 
-nyt_sentiments17_2.info()
+print("nyt_sentiments17_2 structure with renamed columns: \n\n",nyt_sentiments17_2.info())
 
 
 ```
@@ -516,7 +516,7 @@ nyt_shuffled_large = pickle.load(pickle_in)
 
 
 
-nyt_shuffled_large.info()
+print("Sampled dataset shape: \n",nyt_shuffled_large.shape)
 
 
 
@@ -529,7 +529,7 @@ nyt_shuffled_large.info()
 
 
 
-nyt_shuffled_large[['label', 'label_name']].value_counts(normalize=True).round(2)
+print("Sampled dataset sentiment labels by percentage: \n\n",nyt_shuffled_large[['label', 'label_name']].value_counts(normalize=True).round(2))
 
 
 ```
@@ -744,7 +744,7 @@ print("dataset is of type: ",type(dataset))
 #| code-summary: "Show Code"
 
 
-print("dataset structure: \n",dataset)
+print("dataset structure: \n\n",dataset)
 
 ```
 
@@ -784,7 +784,7 @@ padding=max-length - shoter sequences, each row of comments, will be padded up t
 
 truncation=True - text sequences, each row of comments, that exceed the maximum length (input length) allowed by the model will be shortened. 
 
-truncation
+
 
 ```{python}
 #| code-fold: true
@@ -849,7 +849,7 @@ sentiment_encoded = pickle.load(pickle_in)
 #| code-summary: "Show Code"
 
 
-print("sentiment_encoded structure: \n",sentiment_encoded)
+print("sentiment_encoded structure: \n\n",sentiment_encoded)
 
 
 
@@ -949,7 +949,7 @@ text_tokenized=tokenizer([sentence_1, sentence_2], padding=True, return_tensors=
 #| code-fold: true
 #| code-summary: "Show Code"
 
-print("Tokenized sentences attention mask: \n",format(text_tokenized['attention_mask']))
+print("Tokenized sentences attention mask: \n\n",format(text_tokenized['attention_mask']))
 
 
 ```
@@ -1162,6 +1162,7 @@ model.config.label2id
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
+#| include: false
 
 
 device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -1331,7 +1332,7 @@ def compute_metrics(pred):
 
 ```
 
-The function creates the computation of our selected metrics forf use during the model evaluation on our validation set.
+The function creates the computation of our selected metrics for use during the model evaluation on our validation set.
 
 Metric definition:
 
@@ -1452,10 +1453,18 @@ trainer.train()
 
 ```
 
-A loss function tells us how good or bad our model is at making predictions during training by helping us assess the differences between actual values and those predicted by the model. The lower the loss function the better our model is at making predictions.
+Evaluation terms:
+
+ loss function: tells us how good or bad our model is at making predictions during training by helping us assess the differences between actual values and those predicted by the model. The lower the loss function the better our model is at making predictions.
+
+ Generaliztion: a model's ability to accurately adapt to new, unseen data after being trained on a specific dataset (training set). It indicates that the model has learned underlying patterns rather than simply memorizing training data. 
+
+ Overfitting: a model performs well on training data but poorly on evaluation or test data. 
 
 
-After 2nd epoch eval loss 0.15 and training loss0.156.  after 3rd epock eval loss 0.1646 and training loss .129/0.22
+
+
+
 
 
 ```{python}
@@ -1498,15 +1507,15 @@ eval_results_4 = pickle.load(pickle_in)
 #| code-fold: true
 #| code-summary: "Show Code"
 
-print(f"Evaluation results 4 epcohs and 2e-5: {eval_results_4}")
+print(f"Evaluation results 4 epochs and 2e-5 learning rate: \n\n {eval_results_4}")
 
 
 ```
 
-Our first model was trained on 38,786 rows of data, 4 epochs and a learning rate of 2e-5. The result was a training loss of 0.19 and and a evaluation loss of 0.54. evaluation accuracy, precision, recall, and f1 scores were all around 0.88. Though these scores are not bad the difference between training and evaluation loss is significant and indicates overfitting. We'll train the model with different parameters on the same data.
+Our first model was trained on 38,786 rows of data, 4 epochs and a learning rate of 2e-5 (0.00002). The result was a training loss of 0.19 and and a evaluation loss of 0.54. evaluation accuracy, precision, recall, and f1 scores were all around 0.88. Though these scores are not bad the difference between training and evaluation loss is significant and indicates overfitting. We'll train the model with different parameters on the same data.
 
 ```{python}
-#| eval: true
+#| eval: false
 #| echo: false
 
 
@@ -1545,13 +1554,13 @@ eval_results_3 = pickle.load(pickle_in)
 #| code-summary: "Show Code"
 
 
-print(f"Evaluation results 3 epochs and 1e-5 learning rate: {eval_results_3}")
+print(f"Evaluation results 3 epochs and 1e-5 learning rate: \n\n {eval_results_3}")
 
 
 
 ```
 
-This time we changed the number of epochs to 3 and reduced the learning rate to 1e-5. The result was a training loss loss of 0.325 and an evaluation loss of 0.40. Though the evaluation loss was lower, the training loss significantly increased. We would like to have loss scores below 0.2. Additionally, accuracy, precision, recall, and f1 scores dropped to around 0.85. Lowering the learning rate did not have a positive affect on the model. The issue could be our training data is too small, which leads to the model memorizing the training data's specific patterns which causes the model to generalize to new data.
+This time we changed the number of epochs to 3 and reduced the learning rate to 1e-5 (0.00001). The result was a training loss loss of 0.325 and an evaluation loss of 0.40. Though the evaluation loss was lower, the training loss significantly increased. We would like to have loss scores below 0.2. Additionally, accuracy, precision, recall, and f1 scores dropped to around 0.85. Lowering the learning rate did not have a positive affect on the model. The issue could be our training data is too small, causing it to overfit on training data.
 
 ```{python}
 #| eval: false
@@ -1590,13 +1599,13 @@ eval_results_medium = pickle.load(pickle_in)
 #| code-fold: true
 #| code-summary: "Show Code"
 
-print(f"Evaluation results 11% data sample: {eval_results_medium}")
+print(f"Evaluation results 11% data sample: \n\n {eval_results_medium}")
 
 
 
 ```
 
-The sample was increased to 11% of the data. The training set is now 106,662 rows. The additional data had a positive impact on the model as training loss dropped to 0.167 and evaluation loss decreased to .024. Accuracy, precision, recall, and f1 scores all increased to around 0.92. These results moved in the right direction though we would like to close the distance between training loss and evaluation loss.
+The sample was increased to 11% of the data. The training set is now 106,662 rows. The additional data had a positive impact on the model as training loss dropped to 0.167 and evaluation loss decreased to .024. Accuracy, precision, recall, and f1 scores all increased to around 0.92. These results moved in the right direction though the difference between  training loss and evaluation loss indicates overfitting.
 
 
 
@@ -1640,11 +1649,14 @@ eval_results_large = pickle.load(pickle_in)
 #| code-summary: "Show Code"
 
 
-print(f"Evaluation results 25% data and 2 epochs:\n {eval_results_large}")
+print(f"Evaluation results 25% data and 2 epochs:\n\n {eval_results_large}")
 
 ```
 
-For this round of training we increased the sample to 25% of the data, with 169,688 rows assigned to the training data. The result was a training loss 0.1531 and an evaluation loss of 0.1756. Evaluation accuracy, precision, recall, and f1 scores all improved to around 0.95. Increasing the training data to 169,688 rows provided good results as there is only a 0.022 difference between training and evaluation loss indicating not much over fitting. We achieved our evaluation results on only 2 epochs, though even with one less epoch there was a notable increase in evaluation run tumtime.
+For this round of training we increased the sample to 25% of the data, with 169,688 rows assigned to the training data. The result was a training loss 0.1531 and an evaluation loss of 0.1756. Evaluation accuracy, precision, recall, and f1 scores all improved to around 0.95. Increasing the training data to 169,688 rows provided good results as there is only a 0.022 difference between training and evaluation loss indicating minimal over  fitting. We achieved our evaluation results on only 2 epochs, though even with one less epoch there was a notable increase in evaluation run eval runtime.
+
+
+After 2nd epoch eval loss 0.15 and training loss0.156.  after 3rd epock eval loss 0.1646 and training loss .129/0.22
 
 ## Test Set Metrtics
 
@@ -1686,7 +1698,7 @@ preds_output = pickle.load(pickle_in)
 #| code-summary: "Show Code"
 
 
-print("Test set metrics:\n",preds_output.metrics)
+print("Test set metrics: \n\n",preds_output.metrics)
 
 ```
 
@@ -1703,6 +1715,21 @@ In order to create our classification report and confusion matrix we will need t
 y_pred = np.argmax(preds_output.predictions, axis = 1)
 
 y_true = sentiment_encoded['test'][:]['label']
+
+
+
+```
+
+
+
+```{python}
+#| eval: false
+#| echo: false
+
+
+file_out = open("preds_output", "wb")
+pickle.dump(preds_output, file_out)
+file_out.close()
 
 
 
@@ -1759,12 +1786,12 @@ test_classification_rpt = pickle.load(pickle_in)
 
 
 
-print("Test set classification report:\n",test_classification_rpt)
+print("Test set classification report: \n\n",test_classification_rpt)
 
 
 ```
 
-Using the classification report we can evaluate the test set metrics by label. The metrics show what percentage of the predictions were actually true. The model performs very well on predicting negative sentiment (label 0) and positive sentiment (label 2) with scores ranging from 0.94 to 0.97. The model does not perform as well on predicting neutral sentiment (label 1) with scores ranging from 0.81 to 086.  These are still good scores; just not at the level of the other labels. The model is good at accuratley predicting neutral sentiment, it's just not strong in finding neutral sentiment as seen in the .05 difference between precision and recall scores.
+Using the classification report we can evaluate the test set metrics by label. The metrics show what percentage of the predictions were actually true. The model performs very well on predicting negative sentiment (label 0) and positive sentiment (label 2) with scores ranging from 0.94 to 0.97. The model does not perform as well on predicting neutral sentiment (label 1) with scores ranging from 0.81 to 086.  These are still good scores; just not at the level of the other labels. The model is good at accuratley predicting neutral sentiment when it is found. It's just not strong in finding all neutral sentiment as seen in the .05 difference between precision and recall scores.
 
 ```{python}
 
@@ -1869,17 +1896,17 @@ The actual value was negative or positive, but the model predicted a neutral val
 
 Appyling these terms to our confusion matrix we find:
 
-True Negative (TN) = 16,249, meaning our model correctly classified 16,249 negative class data points. True Neutral (TL) = 4,720, meaning our model correctly classified 4,720 neutral class data points. True Positive (TP) = 15,543, meaning our model correctly classified 15,543 positve class data points. False Negative (FN) = 432, meaning the model incorrectly classified 275 neutral and 157 positive class data points as belonging to the negative class. False Neutral (FL) = 1,077, meaning the model incorrectly classified 685 negative and 392 positive class data points as belonging to the neutral class. False Positive (FP) = 765, meaning the model incorrectly classified 296 negative and 469 neutral class data points as belonging to the negative class.
+True Negative (TN) = 20,232, meaning our model correctly classified 20232 negative class data points. True Neutral (TL) = 6,043, meaning our model correctly classified 6,043 neutral class data points. True Positive (TP) = 19658, meaning our model correctly classified 19,658 positve class data points. False Negative (FN) = 607, meaning the model incorrectly classified 402 neutral and 205 positive class data points as belonging to the negative class. False Neutral (FL) = 1,217, meaning the model incorrectly classified 690 negative and 527 positive class data points as belonging to the neutral class. False Positive (FP) = 725, meaning the model incorrectly classified 239 negative and 486 neutral class data points as belonging to the negative class.
 
 We can put these numbers in perspective by using percentages for total predictions for each class.
 
-Of the total predictions for the negative class, 97.4% were correctly predicted as the negative class, 1.7% were incorrectly predicted as the neutral class and less than 1% were incorrectly predicted as the positive class.
+Of the total predictions for the negative class, 97% were correctly predicted as the negative class, 2% were incorrectly predicted as the neutral class and  1% were incorrectly predicted as the positive class.
 
-Of the total predictions for the neutral class, 81.4% were correctly predicted as the neutral class, 11.8% were incorrectly predicted as the negative class, and 6.8% were incorrectly predicted as the positive class.
+Of the total predictions for the neutral class, 83% were correctly predicted as the neutral class, 10% were incorrectly predicted as the negative class, and 7% were incorrectly predicted as the positive class.
 
-Of the total predictions for the positive class, 95.3% were correctly predicted as the positive class,  1.8% were incorrectly predicted as the negative class, and 2.9% were incorrectly predicted as the neutral class.
+Of the total predictions for the positive class, 96.4% were correctly predicted as the positive class,  1.2% were incorrectly predicted as the negative class, and 2.4% were incorrectly predicted as the neutral class.
 
-The insight we gain from these results is the model is excellent at predicting positive and negative sentiment. The model is not as strong at predicting the neutral class though the results are still considered good.
+The insight we gain from these results is the model is excellent at predicting positive and negative sentiment. The model has difficulty with the neutral class as seen with the higher percentage of incorrectly predicting negative and positive classes as neutral.
 
 # Predicting on unlabeled data
 
@@ -2012,7 +2039,7 @@ nyt_sentiments18.info()
 
 ```{python}
 #| eval: false
-#| echo: true
+#| echo: false
 
 
 nyt_sentiments18=nyt_sentiments18.dropna()
@@ -2033,6 +2060,7 @@ device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
+#| include: false
 
 
 new_model.to(device)
@@ -2087,7 +2115,7 @@ def get_prediction(text):
 
 We created a function that will take in a string of text and return the probabilities of the predicted sentiments and the predicted sentiment label with the highest probability. Probabilty is the confidence we have in predicted label.
 
-For comparison, we will print the text string predicted along with the model output.
+The output for our comment predictions will include the text predicted on, the "Type of Material" categorey, "News Desk" categorey, sentiment predicted probabilities, and the predicted label. 
 
 ```{python}
 #| code-fold: true
