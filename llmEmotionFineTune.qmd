@@ -7,6 +7,8 @@ format:
         toc: true
         number-sections: false
         toc-location: left
+        embed-resources: true
+editor: visual
 ---
 
 # Introduction
