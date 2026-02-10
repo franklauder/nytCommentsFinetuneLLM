@@ -107,8 +107,6 @@ The 'True' output means the gpu is available.
 
 ```
 
-
-
 ```{python}
 #| eval: false
 #| echo: false
@@ -156,7 +154,6 @@ nyt_sentiments17 = pickle.load(pickle_in)
 
 ```
 
-
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -169,7 +166,7 @@ print("nyt_sentiment_17 dataset shape: \n",nyt_sentiments17.shape)
 
 ```
 
-The dataset has just under 970,000 rows and 8 columns. 
+The dataset has just under 970,000 rows and 8 columns.
 
 ```{python}
 #| code-fold: true
@@ -183,8 +180,6 @@ print("nyt_sentiment17 dataset structure: \n\n",nyt_sentiments17.info())
 
 ```
 
-
-
 ```{python}
 #| eval: false
 #| echo: false
@@ -194,7 +189,7 @@ print(nyt_sentiments17.head(2))
 
 ```
 
-We used the .info() method to display the column names.  It is important to note that when configuring the pre-trained model, we will need the sentiment column, which is the label name, and the label column which is the numerical representation of the sentiment column. For the pre-trained model we have selected, if both columns are not present in the dataset, training the model will result in an error. In the pre-processing steps we will see why.
+We used the .info() method to display the column names. It is important to note that when configuring the pre-trained model, we will need the sentiment column, which is the label name, and the label column which is the numerical representation of the sentiment column. For the pre-trained model we have selected, if both columns are not present in the dataset, training the model will result in an error. In the pre-processing steps we will see why.
 
 ```{python}
 #| code-fold: true
@@ -207,8 +202,6 @@ print("Sentiment and label columns: \n\n",nyt_sentiments17.iloc[:,6:8].head(2))
 
 
 ```
-
-
 
 ```{python}
 #| code-fold: true
@@ -224,8 +217,6 @@ print("Sentiment value counts: \n\n",nyt_sentiments17["sentiment"].value_counts(
 
 
 ```
-
-
 
 ```{python}
 #| code-fold: true
@@ -381,8 +372,6 @@ nyt_sentiments17_2[['label','label_name']].value_counts(normalize=True).round(2)
 
 ```
 
-
-
 Our dataset's sentiment labels now match the pre-trained model.
 
 ## Train Test Validation split
@@ -461,8 +450,6 @@ nyt_shuffled_medium = pickle.load(pickle_in)
 
 ```
 
- 
-
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -524,7 +511,6 @@ print("Sampled dataset shape: \n",nyt_shuffled_large.shape)
 
 ```
 
-
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -536,8 +522,7 @@ print("Sampled dataset sentiment labels by percentage: \n\n",nyt_shuffled_large[
 
 ```
 
-The sampled data has 242,413 rows.  The sentiment percentage distribution is consistant with the original dataset. 
-
+The sampled data has 242,413 rows. The sentiment percentage distribution is consistent with the original dataset.
 
 ```{python}
 
@@ -546,7 +531,6 @@ The sampled data has 242,413 rows.  The sentiment percentage distribution is con
 
 
 ```
-
 
 70% of the comments will be used for the training set, 10% for the validation set, and the remaining %20 for the testing set.
 
@@ -685,7 +669,7 @@ print("Validation set sentiment percentage values: \n",validation['label_name'].
 
 ## Dataset
 
- The format of our data must be compatible with the transformers from Hugging Face, This can be done by using the DatasetDict function which creates a dictionary-like container. We will use it to hold our train, test, and validation splits.
+The format of our data must be compatible with the transformers from Hugging Face, This can be done by using the DatasetDict function which creates a dictionary-like container. We will use it to hold our train, test, and validation splits.
 
 ```{python}
 #| code-fold: true
@@ -739,8 +723,6 @@ print("dataset is of type: ",type(dataset))
 
 ```
 
-
-
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -750,7 +732,7 @@ print("dataset structure: \n\n",dataset)
 
 ```
 
-The dataset has a dictionary structure in which  the train, test,validation splits are the names of the keys and the values are features: text, label_name, and label.
+The dataset has a dictionary structure in which the train, test,validation splits are the names of the keys and the values are features: text, label_name, and label.
 
 ```{python}
 #| code-fold: true
@@ -777,16 +759,13 @@ tokenizer = AutoTokenizer.from_pretrained("cardiffnlp/twitter-roberta-base-senti
 
 ```
 
+We will create a function that will will transform the text in the dataset to tokens.
 
-We will create a function that will will transform the text in the dataset to tokens. 
+*batch\['text'\]* - all individual comments are grouped together for simultaneous processing by the tokenizer.
 
-batch['text'] - all individual comments are grouped together for simultaneous processing by the tokenizer. 
+*padding=max-length* - shoter sequences, each row of comments, will be padded up to the maximum length set by the mdoel.
 
-padding=max-length - shoter sequences, each row of comments, will be padded up to the maximum length set by the mdoel. 
-
-truncation=True - text sequences, each row of comments, that exceed the maximum length (input length) allowed by the model will be shortened. 
-
-
+*truncation=True* - text sequences, each row of comments, that exceed the maximum length (input length) allowed by the model will be shortened.
 
 ```{python}
 #| code-fold: true
@@ -801,14 +780,7 @@ def tokenize(batch):
 
 ```
 
-
-
-
-
-
 Using the .map method we will apply the tokenize function to the dataset.
-
-
 
 ```{python}
 #| code-fold: true
@@ -861,13 +833,9 @@ There are now two new columns in sentiment_encoded data dictionary: input_ids an
 
 attention_mask are binary values (0s and 1s) used to tell the model which tokens in a sequence should be processed and which should be ignored.
 
-1: The token is a real token and should be attended to.
-0: The token is a padding token and should be ignored. 
+*1*: The token is a real token and should be attended to. *0*: The token is a padding token and should be ignored.
 
-Recall that our tokenizer function padded sequences (comments) so their lengths equaled the maximum length set by the model.  We'll use an example to show how this is displayed. 
-
-
-
+Recall that our tokenizer function padded sequences (comments) so their lengths equaled the maximum length set by the model. We'll use an example to show how this is displayed.
 
 ```{python}
 #| code-fold: true
@@ -889,7 +857,6 @@ print(f"Sensentence 1:\n{sentence_1}")
 
 
 ```
-
 
 ```{python}
 #| code-fold: true
@@ -926,7 +893,7 @@ sentence_2_word_count=len(sentence_2_words)
 
 ```
 
-Two sentences of different lengths. 
+Two sentences of different lengths.
 
 ```{python}
 #| eval: false
@@ -956,14 +923,7 @@ print("Tokenized sentences attention mask: \n\n",format(text_tokenized['attentio
 
 ```
 
-
-
-
-From the output it can be seen that the second list represents the shorter sentence.  The 0s tell the model to ignore the padding, ensuring it only considers  "what", "is", "padding".
-
-
-
-
+From the output it can be seen that the second list represents the shorter sentence. The 0s tell the model to ignore the padding, ensuring it only considers "what", "is", "padding".
 
 ```{python}
 #| code-fold: true
@@ -975,7 +935,7 @@ print("Attention mask first row of training data: \n\n",sentiment_encoded['train
 
 ```
 
-We observe how the attention mask output looks like from one row of training data. 
+We observe how the attention mask output looks like from one row of training data.
 
 ```{python}
 
@@ -1027,7 +987,7 @@ print("First row of train features: \n\n",dataset['train'][0])
 
 From the output we see the label_name and label columns. We will use dictionary comprehension to create these variables. A dictionay comprehension (similar to list comprehension) is a concise way to .
 
-First, label2id will be created. The dictionary comprehension will create a dictionary with key/value pairs. We will generate the dictionary's keys by transforming Label_name and values are generated by transforming labels from dataset['train'].  Basically, this is mapping label_name to label.
+First, label2id will be created. The dictionary comprehension will create a dictionary with key/value pairs. We will generate the dictionary's keys by transforming Label_name and values are generated by transforming labels from dataset\['train'\]. Basically, this is mapping label_name to label.
 
 ```{python}
 #| code-fold: true
@@ -1058,7 +1018,7 @@ label2id
 
 label2id has been successfully created as seen in the output.
 
-Now we will use label2id to create id2label. The difference in using dictionary comprehension here is we'll be transforming the a dictionary (label2id) to create a new dictionary.  The transformation is done by by inter-changing key/value pairs so now the keys from label2id become values and values become keys. This results in id2label having label as the key and label_name as the values.
+Now we will use label2id to create id2label. The difference in using dictionary comprehension here is we'll be transforming the a dictionary (label2id) to create a new dictionary. The transformation is done by by inter-changing key/value pairs so now the keys from label2id become values and values become keys. This results in id2label having label as the key and label_name as the values.
 
 ```{python}
 #| code-fold: true
@@ -1089,7 +1049,7 @@ id2label
 
 # Model Fine Tuning
 
-We will create a model checkpoint which is simply the chosen pre-trined Hugging Face model. Creating the model_checkpoint object makes it easier to apply the model in our process steps.
+We will create a model checkpoint which is simply the chosen pre-trained Hugging Face model. Creating the model_checkpoint object makes it easier to apply the model in our process steps.
 
 ```{python}
 #| code-fold: true
@@ -1160,7 +1120,6 @@ model.config.label2id
 
 ```
 
-
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -1205,8 +1164,6 @@ model
 
 ```
 
-
-
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -1238,11 +1195,7 @@ print("Model label2id configuation: \n",model.config.label2id)
 
 ```
 
-
-
-
 From the model configuration we see the label2id and id2label variables that we needed to create for the model.
-
 
 ## Metrics
 
@@ -1298,11 +1251,6 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 
 ```
 
-
-
- 
-
-
 ```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
@@ -1338,13 +1286,13 @@ The function creates the computation of our selected metrics for use during the 
 
 Metric definition:
 
-• Accuracy-measures the number of predictions that are correct as a percentage of the total number of predictions that are made. As an example, if 90% of your predictions are correct, your accuracy is simply 90%. Calculation: number of correct predictions/Number of total predictions. TP+TN/(TP+TN+FP+FN)
+• *Accuracy* - measures the number of predictions that are correct as a percentage of the total number of predictions that are made. As an example, if 90% of your predictions are correct, your accuracy is simply 90%. Calculation: number of correct predictions/Number of total predictions. TP+TN/(TP+TN+FP+FN)
 
-• Precision-tells us about the quality of positive predictions. It may not find all the positives but the ones that the model does classify as positive are likely to be correct. As an example, out of everyone predicted to have defaulted, how many of them did default? So, within everything that has been predicted as positive, precision counts the percentage that is correct. Calculation: True positives/All Positives. TP/(TP+FP)
+• *Precision* - tells us about the quality of positive predictions. It may not find all the positives but the ones that the model does classify as positive are likely to be correct. As an example, out of everyone predicted to have defaulted, how many of them did default? So, within everything that has been predicted as positive, precision counts the percentage that is correct. Calculation: True positives/All Positives. TP/(TP+FP)
 
-• Recall- tells us about how well the model identifies true positives. The model may find a lot of positives, yet it also will incorrectly detect many positives that are not actually positives. Out of all the patients who have the disease, how many were correctly identified? So, within everything that is positive, how many did the model successfully find? A model with low recall is unable to find all (or a large part) of the positive cases in the data. Calculated as: True Positives/ (False Negatives + True Positives)
+• *Recall* - tells us about how well the model identifies true positives. The model may find a lot of positives, yet it also will incorrectly detect many positives that are not actually positives. Out of all the patients who have the disease, how many were correctly identified? So, within everything that is positive, how many did the model successfully find? A model with low recall is unable to find all (or a large part) of the positive cases in the data. Calculated as: True Positives/ (False Negatives + True Positives)
 
-• F1 Score-The F1 score is defined as the harmonic mean of precision and recall. The formula for the F1 score is the following: 2 times(precision\*Recall)/ (Precision + Recall)) Since the F1 score is an average of Precision and Recall, it means that the F1 score gives equal weight to Precision and Recall.
+• *F1 Score* - The F1 score is defined as the harmonic mean of precision and recall. The formula for the F1 score is the following: 2 times(precision\*Recall)/ (Precision + Recall)) Since the F1 score is an average of Precision and Recall, it means that the F1 score gives equal weight to Precision and Recall.
 
 ```{python}
 #| eval: true
@@ -1389,27 +1337,25 @@ training_args = TrainingArguments(
 
 Training Arguments:
 
--   Output_dir: the directory where we will store the results of the model.
+-   *Output_dir*: the directory where we will store the results of the model.
 
--   overwrite_ouput_dir: When set to true, the output directory is overwritten on a new training of the model.
+-   *overwrite_ouput_dir*: When set to true, the output directory is overwritten on a new training of the model.
 
--   eval_strategy: The interval for evaluating the model. For our training we have set it to evaluate after each epoch*.
+-   *eval_strategy*: The interval for evaluating the model. For our training we have set it to evaluate after each epoch\*.
 
--   save_strategy: How often to save the model. We have set it to after each epoch.
+-   *save_strategy*: How often to save the model. We have set it to after each epoch.
 
--   learning_rate: controls how quickly the model's parameters move towards the optimal solution (minimizing the loss function**)
+-   *learning_rate*: controls how quickly the model's parameters move towards the optimal solution (minimizing the loss function\*\*)
 
--   per_device_train_batch: subset of the entire training dataset. It is the number of samples processed before the model is updated. per_device_eval_batch_size: is the number of samples processed before the model is evaluated.
+-   *per_device_train_batch*: subset of the entire training dataset. It is the number of samples processed before the model is updated. per_device_eval_batch_size: is the number of samples processed before the model is evaluated.
 
--   weight_decay: used to discourage model from using large weight values during training. Prevents overfitting.
+-   *weight_decay*: used to discourage model from using large weight values during training. Prevents overfitting.
 
--   logging_dir: directory where the logs are saved.
+-   *logging_dir*: directory where the logs are saved.
 
--   save_steps: Determines how frequently the model's checkpoint is saved during training.
+-   *save_steps*: Determines how frequently the model's checkpoint is saved during training.
 
-*An epoch is the number of times that the model will work through the entire training set.  This is also known as iteration. In each epoch, the training code updates the weights of the model iteration during which we update the paramters for all our training samples. Updating model weights aims to lower the risk of errors from the model predictions and improve accuracy. 
-
-
+\*An epoch is the number of times that the model will work through the entire training set. This is also known as iteration. In each epoch, the training code updates the weights of the model iteration during which we update the parameters for all our training samples. Updating model weights aims to lower the risk of errors from the model predictions and improve accuracy.
 
 ```{python}
 #| eval: false
@@ -1419,9 +1365,6 @@ Training Arguments:
 #tokenizer=tokenizer)deprecated
 
 ```
-
-
-
 
 ## Trainer
 
@@ -1457,17 +1400,11 @@ trainer.train()
 
 Evaluation terms:
 
- loss function: tells us how good or bad our model is at making predictions during training by helping us assess the differences between actual values and those predicted by the model. The lower the loss function the better our model is at making predictions.
+*loss function*: tells us how good or bad our model is at making predictions during training by helping us assess the differences between actual values and those predicted by the model. The lower the loss function the better our model is at making predictions.
 
- Generaliztion: a model's ability to accurately adapt to new, unseen data after being trained on a specific dataset (training set). It indicates that the model has learned underlying patterns rather than simply memorizing training data. 
+*Generaliztion*: a model's ability to accurately adapt to new, unseen data after being trained on a specific dataset (training set). It indicates that the model has learned underlying patterns rather than simply memorizing training data.
 
- Overfitting: a model performs well on training data but poorly on evaluation or test data. 
-
-
-
-
-
-
+*Overfitting*: a model performs well on training data but poorly on evaluation or test data.
 
 ```{python}
 #| eval: false
@@ -1607,9 +1544,7 @@ print(f"Evaluation results 11% data sample: \n\n {eval_results_medium}")
 
 ```
 
-The sample was increased to 11% of the data. The training set is now 106,662 rows. The additional data had a positive impact on the model as training loss dropped to 0.167 and evaluation loss decreased to .024. Accuracy, precision, recall, and f1 scores all increased to around 0.92. These results moved in the right direction though the difference between  training loss and evaluation loss indicates overfitting.
-
-
+The sample was increased to 11% of the data. The training set is now 106,662 rows. The additional data had a positive impact on the model as training loss dropped to 0.167 and evaluation loss decreased to .024. Accuracy, precision, recall, and f1 scores all increased to around 0.92. These results moved in the right direction though the difference between training loss and evaluation loss indicates overfitting.
 
 ```{python}
 #| code-fold: true
@@ -1655,10 +1590,9 @@ print(f"Evaluation results 25% data and 2 epochs:\n\n {eval_results_large}")
 
 ```
 
-For this round of training we increased the sample to 25% of the data, with 169,688 rows assigned to the training data. The result was a training loss 0.1531 and an evaluation loss of 0.1756. Evaluation accuracy, precision, recall, and f1 scores all improved to around 0.95. Increasing the training data to 169,688 rows provided good results as there is only a 0.022 difference between training and evaluation loss indicating minimal over  fitting. We achieved our evaluation results on only 2 epochs, though even with one less epoch there was a notable increase in evaluation run eval runtime.
+For this round of training we increased the sample to 25% of the data, with 169,688 rows assigned to the training data. The result was a training loss 0.1531 and an evaluation loss of 0.1756. Evaluation accuracy, precision, recall, and f1 scores all improved to around 0.95. Increasing the training data to 169,688 rows provided good results as there is only a 0.022 difference between training and evaluation loss indicating minimal over fitting. We achieved our evaluation results on only 2 epochs, though even with one less epoch there was a notable increase in evaluation run eval runtime.
 
-
-After 2nd epoch eval loss 0.15 and training loss0.156.  after 3rd epock eval loss 0.1646 and training loss .129/0.22
+After 2nd epoch eval loss 0.15 and training loss0.156. after 3rd epock eval loss 0.1646 and training loss .129/0.22
 
 ## Test Set Metrtics
 
@@ -1721,8 +1655,6 @@ y_true = sentiment_encoded['test'][:]['label']
 
 
 ```
-
-
 
 ```{python}
 #| eval: false
@@ -1793,7 +1725,7 @@ print("Test set classification report: \n\n",test_classification_rpt)
 
 ```
 
-Using the classification report we can evaluate the test set metrics by label. The metrics show what percentage of the predictions were actually true. The model performs very well on predicting negative sentiment (label 0) and positive sentiment (label 2) with scores ranging from 0.94 to 0.97. The model does not perform as well on predicting neutral sentiment (label 1) with scores ranging from 0.81 to 086.  These are still good scores; just not at the level of the other labels. The model is good at accuratley predicting neutral sentiment when it is found. It's just not strong in finding all neutral sentiment as seen in the .05 difference between precision and recall scores.
+Using the classification report we can evaluate the test set metrics by label. The metrics show what percentage of the predictions were actually true. The model performs very well on predicting negative sentiment (label 0) and positive sentiment (label 2) with scores ranging from 0.94 to 0.97. The model does not perform as well on predicting neutral sentiment (label 1) with scores ranging from 0.81 to 086. These are still good scores; just not at the level of the other labels. The model is good at accurately predicting neutral sentiment when it is found. It's just not strong in finding all neutral sentiment as seen in the .05 difference between precision and recall scores.
 
 ```{python}
 
@@ -1898,15 +1830,15 @@ The actual value was negative or positive, but the model predicted a neutral val
 
 Appyling these terms to our confusion matrix we find:
 
-True Negative (TN) = 20,232, meaning our model correctly classified 20232 negative class data points. True Neutral (TL) = 6,043, meaning our model correctly classified 6,043 neutral class data points. True Positive (TP) = 19658, meaning our model correctly classified 19,658 positve class data points. False Negative (FN) = 607, meaning the model incorrectly classified 402 neutral and 205 positive class data points as belonging to the negative class. False Neutral (FL) = 1,217, meaning the model incorrectly classified 690 negative and 527 positive class data points as belonging to the neutral class. False Positive (FP) = 725, meaning the model incorrectly classified 239 negative and 486 neutral class data points as belonging to the negative class.
+True Negative (TN) = 20,232, meaning our model correctly classified 20232 negative class data points. True Neutral (TL) = 6,043, meaning our model correctly classified 6,043 neutral class data points. True Positive (TP) = 19658, meaning our model correctly classified 19,658 positive class data points. False Negative (FN) = 607, meaning the model incorrectly classified 402 neutral and 205 positive class data points as belonging to the negative class. False Neutral (FL) = 1,217, meaning the model incorrectly classified 690 negative and 527 positive class data points as belonging to the neutral class. False Positive (FP) = 725, meaning the model incorrectly classified 239 negative and 486 neutral class data points as belonging to the negative class.
 
 We can put these numbers in perspective by using percentages for total predictions for each class.
 
-Of the total predictions for the negative class, 97% were correctly predicted as the negative class, 2% were incorrectly predicted as the neutral class and  1% were incorrectly predicted as the positive class.
+Of the total predictions for the negative class, 97% were correctly predicted as the negative class, 2% were incorrectly predicted as the neutral class and 1% were incorrectly predicted as the positive class.
 
 Of the total predictions for the neutral class, 83% were correctly predicted as the neutral class, 10% were incorrectly predicted as the negative class, and 7% were incorrectly predicted as the positive class.
 
-Of the total predictions for the positive class, 96.4% were correctly predicted as the positive class,  1.2% were incorrectly predicted as the negative class, and 2.4% were incorrectly predicted as the neutral class.
+Of the total predictions for the positive class, 96.4% were correctly predicted as the positive class, 1.2% were incorrectly predicted as the negative class, and 2.4% were incorrectly predicted as the neutral class.
 
 The insight we gain from these results is the model is excellent at predicting positive and negative sentiment. The model has difficulty with the neutral class as seen with the higher percentage of incorrectly predicting negative and positive classes as neutral.
 
@@ -2069,7 +2001,7 @@ new_model.to(device)
 
 ```
 
-We are setting the sci_mode (scientific notation) to false for easier interpretaton of probability output.
+We are setting the sci_mode (scientific notation) to false for easier interpretation of probability output.
 
 ```{python}
 #| code-fold: true
@@ -2117,7 +2049,7 @@ def get_prediction(text):
 
 We created a function that will take in a string of text and return the probabilities of the predicted sentiments and the predicted sentiment label with the highest probability. Probabilty is the confidence we have in predicted label.
 
-The output for our comment predictions will include the text predicted on, the "Type of Material" categorey, "News Desk" categorey, sentiment predicted probabilities, and the predicted label. 
+The output for our comment predictions will include the text predicted on, the "Type of Material" category, "News Desk" category, sentiment predicted probabilities, and the predicted label.
 
 ```{python}
 #| code-fold: true
@@ -2158,8 +2090,6 @@ get_prediction(nyt_sentiments18.iloc[200,0])
 
 
 ```
-
-
 
 ```{python}
 #| code-fold: true
@@ -2267,7 +2197,6 @@ get_prediction(nyt_sentiments18.iloc[10000,0])
 
 ```
 
-
 ```{python}
 #| eval: true
 #| echo: false
@@ -2296,8 +2225,6 @@ get_prediction(nyt_sentiments18.iloc[40000,0])
 
 
 ```
-
-
 
 ```{python}
 #| eval: false
@@ -2346,7 +2273,6 @@ get_prediction(nyt_sentiments18.iloc[280000,0])
 
 ```
 
-
 ```{python}
 #| eval: true
 #| echo: false
@@ -2391,7 +2317,6 @@ get_prediction(nyt_sentiments18.iloc[580000,0])
 
 ```
 
-
 ```{python}
 #| eval: false
 #| echo: false
@@ -2420,7 +2345,7 @@ get_prediction(nyt_sentiments18.iloc[800000,0])
 
 ```
 
-From a our randomly selected  sample of comments we find mostly high confidence in the models predictions. 
+From a our randomly selected sample of comments we find mostly high confidence in the models predictions.
 
 # Using fine-tuned model
 
