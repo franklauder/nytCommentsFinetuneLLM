@@ -34,6 +34,7 @@ import numpy as np
 import pickle
 import sklearn
 from sklearn.model_selection import train_test_split
+from pprint import pprint
 
 
 ```
@@ -999,11 +1000,22 @@ label2id = {x['label_name']:x['label'] for x in dataset['train']}
 ```
 
 ```{python}
-#| code-fold: true
-#| code-summary: "Show Code"
+#| eval: false
+#| echo: false
 
 
 print("label2id dictionary: \n",label2id.items())
+
+```
+
+
+```{python}
+#| code-fold: true
+#| code-summary: "Show Code"
+
+print("label2id dictionary")
+pprint(label2id)
+
 
 ```
 
@@ -1030,10 +1042,21 @@ id2label = {v:k for  k,v in label2id.items()}
 ```
 
 ```{python}
+#| eval: false
+#| echo: false
+
+print("id2label dictionary: \n",id2label.items())
+
+
+```
+
+
+```{python}
 #| code-fold: true
 #| code-summary: "Show Code"
 
-print("id2label dictionary: \n",id2label.items())
+print("id2label dictionary")
+pprint(id2label)
 
 
 ```
@@ -2347,6 +2370,6 @@ get_prediction(nyt_sentiments18.iloc[800000,0])
 
 From a our randomly selected sample of comments we find mostly high confidence in the models predictions.
 
-# Using fine-tuned model
+# Fine-tuned model in production
 
-Our fine-tuned model can be used in a number of ways. We can build an application with our model on a platform such as Streamlit, which will allow users to have a user interface to upload text for sentiment prediction. Our model can also be used as part of an AI Agent.
+Our fine-tuned model is now ready for production. There are several paths for production.  We can build a stand alone web application for our model  with platforms such as Streamlit or GHradio, which will allow users to have an interface for uploading  text for sentiment prediction. Alternatively, our model can be used as part of an AI Agent.
